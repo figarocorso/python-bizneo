@@ -1,4 +1,6 @@
 import argparse
+from os import path
+from glob import glob
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 
@@ -17,11 +19,23 @@ def parse_args():
     return args
 
 
+def get_default_firefox_profile():
+    profile_path = path.expanduser('~/Library/Application Support/Firefox/Profiles')
+    if not path.exists(profile_path):
+        raise Exception("Firefox profiles directory not found.")
+
+    default_profiles = glob(path.join(profile_path, '*.default'))
+    if not default_profiles:
+        raise Exception("Default profile not found.")
+
+    return default_profiles[0]
+
+
 def main(args):
     with sync_playwright() as p:
         firefox = p.firefox
         browser = firefox.launch_persistent_context(
-            user_data_dir=PROFILE_PATH, headless=False, args=["--new-tab"]
+            user_data_dir=PROFILE_PATH or get_default_firefox_profile(), headless=False, args=["--new-tab"]
         )
         page = browser.pages[0]
         page.goto("https://sysdig.bizneohr.com")
