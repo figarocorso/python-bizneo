@@ -20,11 +20,11 @@ def parse_args():
 
 
 def get_default_firefox_profile():
-    profile_path = path.expanduser('~/Library/Application Support/Firefox/Profiles')
+    profile_path = path.expanduser("~/Library/Application Support/Firefox/Profiles")
     if not path.exists(profile_path):
         raise Exception("Firefox profiles directory not found.")
 
-    default_profiles = glob(path.join(profile_path, '*.default'))
+    default_profiles = glob(path.join(profile_path, "*.default"))
     if not default_profiles:
         raise Exception("Default profile not found.")
 
