@@ -11,6 +11,7 @@ PROFILE_PATH = ""
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=False, help="Fecha en formato YYYY-M-D (Default: today)")
+    parser.add_argument("--headless", action="store_true", help="Run browswer in headless mode")
     args = parser.parse_args()
     if args.date:
         args.date = datetime.strptime(args.date, "%Y-%m-%d")
@@ -35,7 +36,9 @@ def main(args):
     with sync_playwright() as p:
         firefox = p.firefox
         browser = firefox.launch_persistent_context(
-            user_data_dir=PROFILE_PATH or get_default_firefox_profile(), headless=False, args=["--new-tab"]
+            user_data_dir=PROFILE_PATH or get_default_firefox_profile(),
+            headless=args.headless,
+            args=["--new-tab"],
         )
         page = browser.pages[0]
         page.goto("https://sysdig.bizneohr.com")
