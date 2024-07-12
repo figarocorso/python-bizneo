@@ -48,12 +48,18 @@ def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
     page.goto(f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user_id}?year={year}&month={month}")
     page.reload()
     page.locator(f"//tr[@data-bulk-element='{day}']/td[@class='actions']").click()
-    locator = page.locator(
-        f"//form[contains(@action, '={day}')]//button[contains(@class, 'is-link')][contains(text(), 'añadir jornada esperada')]"  # noqa
-    )
-    for element in locator.all():
+    add_default_schedule_selector = f"//form[contains(@action, '={day}')]//button[contains(@class, 'is-link')][contains(text(), 'jornada esperada')]"  # noqa
+    if not any_locator_is_visible(page, add_default_schedule_selector):
+        print("Schedule was already registered")
+        return
+
+    print(f"adding expected schedule for user {user_id} at {year}-{month}-{day})")
+    for element in page.locator(add_default_schedule_selector).all():
         if element.is_visible():
             element.click()
-    print(f"adding expected schedule for user {user_id} at {year}-{month}-{day})")
-    page.locator("//button[contains(text(), 'confirmar')]").click()
-    page.wait_for_selector("//*[contains(text(), 'has añadido con éxito')]").wait_for_element_state("visible")
+    page.locator("//button[contains(text(), 'Confirmar')]").click()
+    page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]").wait_for_element_state("visible")
+
+
+def any_locator_is_visible(page, selector):
+    return any([x.is_visible() for x in page.locator(selector).all()])
