@@ -19,7 +19,7 @@ Ensure you have Python 3 installed and the required dependencies. Execute the CL
 
 ## Hacking
 
-The project dependencies are specified in a `pyproject.toml` file, which adheres to several Python PEPs, making it easy to manage and maintain the project. The most commonly used tool to handle this kind of projects is Poetry, which simplifies dependency management and setup.
+The project dependencies are specified in a `pyproject.toml` file, which adheres to several Python PEPs, making it easy to manage and maintain the project. The most commonly used tool to handle this kind of projects is [Poetry](https://python-poetry.org/), which simplifies dependency management and setup.
 
 To get started with development:
 
@@ -53,5 +53,5 @@ This file is a temporary solution for supporting Google login to Bizneo. It uses
 
 ## License
 
-This project is licensed under the GPL-3.0 License.
+This project is licensed under the [GPL-3.0 License](LICENSE).
 
