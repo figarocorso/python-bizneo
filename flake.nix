@@ -10,8 +10,8 @@
     nixpkgs,
     poetry2nix-python,
     utils,
-  }:
-    utils.lib.eachDefaultSystem (
+  }: let
+    flake = utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {
           inherit system;
@@ -46,4 +46,12 @@
         formatter = pkgs.alejandra;
       }
     );
+
+    overlays = {
+      default = final: prev: {
+        bizneo = self.packages.${prev.system}.bizneo;
+      };
+    };
+  in
+    flake // {inherit overlays;};
 }
