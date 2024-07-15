@@ -19,5 +19,8 @@ class User:
             main_taxons=data.get("main_taxons", ""),
         )
 
+    def in_taxon(self, taxon_name):
+        return taxon_name.lower() in self.main_taxons.lower()
+
     def has_keyword(self, keyword):
         return keyword.lower() in self.name.lower()

@@ -8,6 +8,9 @@ from src.api.bizneo_requestor import (
 )
 
 
+EXPECTED_WORKING_HOURS = 8.0
+
+
 class DataErrorException(Exception):
     pass
 
@@ -40,9 +43,14 @@ def get_kind_id_from_keyword(keyword):
 
 
 def get_time_report_for_taxon(taxon, start_at, end_at):
-    users_in_taxon = [user for user in get_users() if taxon.lower() in user.main_taxons.lower()]
-    users_report = []
+    users_in_taxon = [user for user in get_users() if user.in_taxon(taxon)]
     for user in users_in_taxon:
+        print(f"User: {user.first_name} {user.last_name}")
         schedules = get_user_schedules(user.user_id, start_at, end_at)
         logged_times = get_user_logged_times(user.user_id, start_at, end_at)
-        users_report.append({"user": user, "schedules": schedules, "logged_times": logged_times})
+        for schedule in [x for x in schedules if x.is_working_day]:
+            for logged_time in logged_times:
+                if schedule.date == logged_time.date and (
+                    not logged_time.has_logged_time or logged_time.total_hours != EXPECTED_WORKING_HOURS
+                ):
+                    print(f"  {schedule.date}: {logged_time.total_hours} hours")

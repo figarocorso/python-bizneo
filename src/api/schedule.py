@@ -14,3 +14,7 @@ class Schedule:
             date=data.get("date"),
             kind=data.get("kind"),
         )
+
+    @property
+    def is_working_day(self):
+        return self.kind == "working_day"
