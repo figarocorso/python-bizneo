@@ -25,6 +25,12 @@ def get_absence_kinds():
     return absence_kinds
 
 
+def get_user(user_id):
+    get_user_url = f"{URL}/api/v1/users/{user_id}/{TOKEN_PARAMETER}"
+    response = _get_request_json(get_user_url)
+    return User.from_dict(response.get("user", {}))
+
+
 def get_users():
     page_number = 1
     total_pages = 2

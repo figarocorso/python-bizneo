@@ -2,7 +2,7 @@
 
 import click
 
-from src.api.absences_tasks import create_absence_for_all_users
+from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
 
 
 @click.group()
@@ -22,7 +22,9 @@ def absences():
 @click.option("--comment", type=str, required=False, default="", help="Name of the absence to add")
 @click.option("--user_id", type=str, help="User to add the absence (empty for all users)")
 def add(kind, start_at, end_at, comment, user_id):
-    if not user_id:
+    if user_id:
+        create_absence_for_user(user_id, kind, start_at, end_at, comment)
+    else:
         create_absence_for_all_users(kind, start_at, end_at, comment)
 
 

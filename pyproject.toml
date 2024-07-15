@@ -1,3 +1,6 @@
+[tool.black]
+line-length = 110
+
 [tool.poetry]
 name = "python-bizneo"
 version = "0.1.0"
