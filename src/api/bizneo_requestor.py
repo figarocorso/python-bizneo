@@ -2,6 +2,7 @@ import requests
 
 from src.api.absence_kind import AbsenceKind
 from src.api.user import User
+from src.api.schedule import Schedule
 
 
 URL = "https://sysdig.bizneohr.com"
@@ -46,6 +47,13 @@ def get_users():
     return users
 
 
+def get_user_schedules(user_id, start_at, end_at):
+    get_user_url = (
+        f"{URL}/api/v1/users/{user_id}/schedules/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
+    )
+    return _get_instance_list_from_paginated_get_request(get_user_url, "day_details", Schedule)
+
+
 def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
     print(f"adding absence for user {user_id}")
     absence_data = {
@@ -57,6 +65,21 @@ def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
         }
     }
     _post_request_json(f"{URL}/api/v1/users/{user_id}/absences{TOKEN_PARAMETER}", absence_data)
+
+
+def _get_instance_list_from_paginated_get_request(url, data_dict_key, data_class):
+    page_number = 1
+    total_pages = 2
+    data_url = f"{url}&page={{page_number}}"
+    data_list = []
+    while page_number <= total_pages:
+        response = _get_request_json(data_url.format(page_number=page_number))
+        page_number += 1
+        total_pages = response.get("pagination", []).get("total_pages", 0)
+        for data_item in response.get(data_dict_key, []):
+            data_list.append(data_class.from_dict(data_item))
+
+    return data_list
 
 
 def _get_request_json(url):

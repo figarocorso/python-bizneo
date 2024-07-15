@@ -1,4 +1,10 @@
-from src.api.bizneo_requestor import get_absence_kinds, get_user, get_users, request_absence_for_user
+from src.api.bizneo_requestor import (
+    get_absence_kinds,
+    get_user,
+    get_users,
+    request_absence_for_user,
+    get_user_schedules,
+)
 
 
 class DataErrorException(Exception):
@@ -30,3 +36,14 @@ def get_kind_id_from_keyword(keyword):
     raise DataErrorException(
         f"We haven't found the keyword {keyword} among our abscense kinds:\n{absence_kinds}"
     )
+
+
+def get_time_report_for_taxon(taxon, start_at, end_at):
+    users_in_taxon = [user for user in get_users() if taxon.lower() in user.main_taxons.lower()]
+    users_report = []
+    for user in users_in_taxon:
+        users_report.append(get_time_report_for_user(user, start_at, end_at))
+
+
+def get_time_report_for_user(user, start_at, end_at):
+    print(get_user_schedules(user.user_id, start_at, end_at))
