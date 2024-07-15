@@ -1,8 +1,9 @@
 import requests
 
 from src.api.absence_kind import AbsenceKind
-from src.api.user import User
+from src.api.logged_time import LoggedTime
 from src.api.schedule import Schedule
+from src.api.user import User
 
 
 URL = "https://sysdig.bizneohr.com"
@@ -42,6 +43,11 @@ def get_user_schedules(user_id, start_at, end_at):
         f"{URL}/api/v1/users/{user_id}/schedules/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
     )
     return _get_instance_list_from_paginated_get_request(get_user_schedules_url, "day_details", Schedule)
+
+
+def get_user_logged_times(user_id, start_at, end_at):
+    url = f"{URL}/api/v1/users/{user_id}/logged-times/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
+    return _get_instance_list_from_paginated_get_request(url, "logged_times", LoggedTime)
 
 
 def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):

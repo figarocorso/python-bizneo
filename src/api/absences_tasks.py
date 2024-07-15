@@ -4,6 +4,7 @@ from src.api.bizneo_requestor import (
     get_users,
     request_absence_for_user,
     get_user_schedules,
+    get_user_logged_times,
 )
 
 
@@ -42,9 +43,6 @@ def get_time_report_for_taxon(taxon, start_at, end_at):
     users_in_taxon = [user for user in get_users() if taxon.lower() in user.main_taxons.lower()]
     users_report = []
     for user in users_in_taxon:
-        schedules = get_time_report_for_user(user.user_id, start_at, end_at)
-        users_report.append({"user": user, "schedules": schedules})
-
-
-def get_time_report_for_user(user_id, start_at, end_at):
-    return get_user_schedules(user_id, start_at, end_at)
+        schedules = get_user_schedules(user.user_id, start_at, end_at)
+        logged_times = get_user_logged_times(user.user_id, start_at, end_at)
+        users_report.append({"user": user, "schedules": schedules, "logged_times": logged_times})
