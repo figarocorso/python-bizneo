@@ -2,7 +2,7 @@
 
 import click
 
-from src.absences_tasks import create_absence_for_all_users
+from src.api.absences_tasks import create_absence_for_all_users
 
 
 @click.group()

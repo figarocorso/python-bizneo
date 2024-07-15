@@ -45,7 +45,7 @@ python <your_script_name>.py
 
 #### bizneo.py
 
-This file is still under active development. It handles the core functionality of the CLI tool, specifically integrating with the Bizneo API to manage absences. To use this script, you need to add your Bizneo API token by looking for the `TOKEN_PARAMETER` within the file and inserting your token value there.
+This file is still under active development. It handles the core functionality of the CLI tool, specifically integrating with the Bizneo API to manage absences. To use this script, you need to add your Bizneo API token by looking for the `TOKEN` within the file and inserting your token value there.
 
 #### bizneo_browser.py
 
