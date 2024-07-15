@@ -42,8 +42,9 @@ def get_time_report_for_taxon(taxon, start_at, end_at):
     users_in_taxon = [user for user in get_users() if taxon.lower() in user.main_taxons.lower()]
     users_report = []
     for user in users_in_taxon:
-        users_report.append(get_time_report_for_user(user, start_at, end_at))
+        schedules = get_time_report_for_user(user.user_id, start_at, end_at)
+        users_report.append({"user": user, "schedules": schedules})
 
 
-def get_time_report_for_user(user, start_at, end_at):
-    print(get_user_schedules(user.user_id, start_at, end_at))
+def get_time_report_for_user(user_id, start_at, end_at):
+    return get_user_schedules(user_id, start_at, end_at)

@@ -33,25 +33,15 @@ def get_user(user_id):
 
 
 def get_users():
-    page_number = 1
-    total_pages = 2
     get_users_url = f"{URL}/api/v1/users/{TOKEN_PARAMETER}&page={{page_number}}"
-    users = []
-    while page_number <= total_pages:
-        response = _get_request_json(get_users_url.format(page_number=page_number))
-        page_number += 1
-        total_pages = response.get("pagination", []).get("total_pages", 0)
-        for user in response.get("users", []):
-            users.append(User.from_dict(user))
-
-    return users
+    return _get_instance_list_from_paginated_get_request(get_users_url, "users", User)
 
 
 def get_user_schedules(user_id, start_at, end_at):
-    get_user_url = (
+    get_user_schedules_url = (
         f"{URL}/api/v1/users/{user_id}/schedules/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
     )
-    return _get_instance_list_from_paginated_get_request(get_user_url, "day_details", Schedule)
+    return _get_instance_list_from_paginated_get_request(get_user_schedules_url, "day_details", Schedule)
 
 
 def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
