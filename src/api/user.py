@@ -7,6 +7,7 @@ class User:
     email: str
     first_name: str
     last_name: str
+    main_taxons: str
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -15,7 +16,11 @@ class User:
             email=data.get("email"),
             first_name=data.get("first_name"),
             last_name=data.get("last_name"),
+            main_taxons=data.get("main_taxons", ""),
         )
+
+    def in_taxon(self, taxon_name):
+        return taxon_name.lower() in self.main_taxons.lower()
 
     def has_keyword(self, keyword):
         return keyword.lower() in self.name.lower()

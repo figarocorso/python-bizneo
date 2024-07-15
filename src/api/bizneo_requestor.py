@@ -1,6 +1,8 @@
 import requests
 
 from src.api.absence_kind import AbsenceKind
+from src.api.logged_time import LoggedTime
+from src.api.schedule import Schedule
 from src.api.user import User
 
 
@@ -32,18 +34,20 @@ def get_user(user_id):
 
 
 def get_users():
-    page_number = 1
-    total_pages = 2
     get_users_url = f"{URL}/api/v1/users/{TOKEN_PARAMETER}&page={{page_number}}"
-    users = []
-    while page_number <= total_pages:
-        response = _get_request_json(get_users_url.format(page_number=page_number))
-        page_number += 1
-        total_pages = response.get("pagination", []).get("total_pages", 0)
-        for user in response.get("users", []):
-            users.append(User.from_dict(user))
+    return _get_instance_list_from_paginated_get_request(get_users_url, "users", User)
 
-    return users
+
+def get_user_schedules(user_id, start_at, end_at):
+    get_user_schedules_url = (
+        f"{URL}/api/v1/users/{user_id}/schedules/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
+    )
+    return _get_instance_list_from_paginated_get_request(get_user_schedules_url, "day_details", Schedule)
+
+
+def get_user_logged_times(user_id, start_at, end_at):
+    url = f"{URL}/api/v1/users/{user_id}/logged-times/{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
+    return _get_instance_list_from_paginated_get_request(url, "logged_times", LoggedTime)
 
 
 def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
@@ -57,6 +61,21 @@ def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
         }
     }
     _post_request_json(f"{URL}/api/v1/users/{user_id}/absences{TOKEN_PARAMETER}", absence_data)
+
+
+def _get_instance_list_from_paginated_get_request(url, data_dict_key, data_class):
+    page_number = 1
+    total_pages = 2
+    data_url = f"{url}&page={{page_number}}"
+    data_list = []
+    while page_number <= total_pages:
+        response = _get_request_json(data_url.format(page_number=page_number))
+        page_number += 1
+        total_pages = response.get("pagination", []).get("total_pages", 0)
+        for data_item in response.get(data_dict_key, []):
+            data_list.append(data_class.from_dict(data_item))
+
+    return data_list
 
 
 def _get_request_json(url):
