@@ -1,8 +1,18 @@
-from src.api.bizneo_requestor import get_absence_kinds, get_users, request_absence_for_user
+from src.api.bizneo_requestor import get_absence_kinds, get_user, get_users, request_absence_for_user
 
 
 class DataErrorException(Exception):
     pass
+
+
+def create_absence_for_user(user_id, kind, start_at, end_at, comment=""):
+    print(
+        f"Creating absence to user {user_id} of kind '{kind}' "
+        f"[{start_at} - {end_at}] with comment '{comment}'"
+    )
+    kind_id = get_kind_id_from_keyword(kind)
+    user = get_user(user_id)
+    request_absence_for_user(kind_id, start_at, end_at, comment, user.user_id)
 
 
 def create_absence_for_all_users(kind, start_at, end_at, comment=""):
