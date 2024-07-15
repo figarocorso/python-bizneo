@@ -1,11 +1,12 @@
 import requests
 
-from src.absence_kind import AbsenceKind
-from src.user import User
+from src.api.absence_kind import AbsenceKind
+from src.api.user import User
 
 
 URL = "https://sysdig.bizneohr.com"
-TOKEN_PARAMETER = "?token="
+TOKEN = ""
+TOKEN_PARAMETER = f"?token={TOKEN}"
 HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json",

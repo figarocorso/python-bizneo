@@ -1,4 +1,4 @@
-from src.bizneo_requestor import get_absence_kinds, get_users, request_absence_for_user
+from src.api.bizneo_requestor import get_absence_kinds, get_users, request_absence_for_user
 
 
 class DataErrorException(Exception):
