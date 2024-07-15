@@ -53,7 +53,7 @@ def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
         print("Schedule was already registered")
         return
 
-    print(f"adding expected schedule for user {user_id} at {year}-{month}-{day})")
+    print(f"Adding expected schedule for user {user_id} at {year}-{month}-{day}")
     for element in page.locator(add_default_schedule_selector).all():
         if element.is_visible():
             element.click()
