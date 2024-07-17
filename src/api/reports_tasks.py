@@ -5,7 +5,7 @@ EXPECTED_WORKING_HOURS = 8.0
 
 
 def get_time_report_for_taxon(taxon, start_at, end_at):
-    message = ""
+    message = f"Report for date range: [{start_at}, {end_at}]\n"
     users_in_taxon = [user for user in get_users() if user.in_taxon(taxon)]
     for user in users_in_taxon:
         schedules = get_user_schedules(user.user_id, start_at, end_at)
