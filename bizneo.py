@@ -5,11 +5,8 @@ from datetime import datetime, timedelta
 
 import click
 
-from src.api.absences_tasks import (
-    create_absence_for_all_users,
-    create_absence_for_user,
-    get_time_report_for_taxon,
-)
+from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
+from src.api.reports_tasks import get_time_report_for_taxon
 from src.api.webhook import send_message_to_webhook
 
 
