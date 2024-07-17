@@ -8,6 +8,7 @@ import click
 from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
 from src.api.reports_tasks import get_time_report_for_taxon
 from src.api.webhook import send_message_to_webhook
+from src.browser.library import add_expected_schedule
 
 
 @click.group()
@@ -16,11 +17,21 @@ def cli():
 
 
 @cli.group()
-def absences():
+def admin():
     pass
 
 
 @cli.group()
+def browser():
+    pass
+
+
+@admin.group()
+def absences():
+    pass
+
+
+@admin.group()
 def time():
     pass
 
@@ -81,6 +92,27 @@ def report(taxon, start_at, end_at, webhook, headers):
     ok, response = send_message_to_webhook(webhook, report_text, headers)
     if not ok:
         print("There was an error with the webhook request:\n{response}")
+
+
+def parse_date_today(ctx, param, value):
+    if value:
+        value = datetime.strptime(value, "%Y-%m-%d")
+    else:
+        value = datetime.now()
+    return value
+
+
+@browser.command()
+@click.option(
+    "--date",
+    type=str,
+    callback=parse_date_today,
+    required=False,
+    help="Date in format YYYY-M-D (Default: today)",
+)
+@click.option("--headless", is_flag=True, required=False, help="Run browser in headless mode")
+def expected(date, headless):
+    add_expected_schedule(date, headless)
 
 
 if __name__ == "__main__":

@@ -6,20 +6,20 @@ from playwright.sync_api import sync_playwright
 PROFILE_PATH = ""
 
 
-def add_expected_schedule(args):
+def add_expected_schedule(date, headless):
     with sync_playwright() as playwright:
-        browser, page = get_browser_and_page(playwright, args)
+        browser, page = get_browser_and_page(playwright, date, headless)
         user_id = get_current_user_id(page)
-        year, month, day = (args.date.year, args.date.month, args.date.day)
+        year, month, day = (date.year, date.month, date.day)
         add_expected_schedule_at_date_for_user(page, user_id, year, month, day)
         browser.close()
 
 
-def get_browser_and_page(playwright, args):
+def get_browser_and_page(playwright, date, headless):
     firefox = playwright.firefox
     browser = firefox.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_firefox_profile(),
-        headless=args.headless,
+        headless=headless,
         args=["--new-tab"],
     )
     page = browser.pages[0]

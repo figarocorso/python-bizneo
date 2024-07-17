@@ -47,7 +47,7 @@ python <your_script_name>.py
 
 This file is still under active development. It handles the core functionality of the CLI tool, specifically integrating with the Bizneo API to manage absences. To use this script, you need to add your Bizneo API token by looking for the `TOKEN` within the file and inserting your token value there.
 
-#### bizneo_browser.py
+#### Browser automation
 
 This file is a temporary solution for supporting Google login to Bizneo. It uses a Firefox browser profile to maintain a logged-in session with Bizneo. You need to set the `PROFILE_PATH` to one of your existing Firefox profiles. Initially, you must log in to Bizneo manually. You might want to use `time.sleep(100000)` or insert a `breakpoint()` to pause the script and complete the manual login before proceeding. Note that this script is not yet headless, meaning it will open a visible browser window during execution.
 
