@@ -6,18 +6,27 @@ from playwright.sync_api import sync_playwright
 PROFILE_PATH = ""
 
 
-def add_expected_schedule(date, headless):
+def add_expected_schedule(date, headless, browser):
     with sync_playwright() as playwright:
-        browser, page = get_browser_and_page(playwright, date, headless)
+        browser, page = get_browser_and_page(playwright, date, headless, browser)
         user_id = get_current_user_id(page)
         year, month, day = (date.year, date.month, date.day)
         add_expected_schedule_at_date_for_user(page, user_id, year, month, day)
         browser.close()
 
 
-def get_browser_and_page(playwright, date, headless):
-    firefox = playwright.firefox
-    browser = firefox.launch_persistent_context(
+# Fixme(fede): should we refactor this and move it to another module?
+def get_browser_and_page(playwright, date, headless, browser):
+    if browser == "firefox":
+        return get_firefox(playwright, date, headless)
+    elif browser == "chromium":
+        return get_chromium(playwright, date, headless)
+
+    print(f"Warning: unsupported browser specified: {browser}, will fallback to firefox")
+    return get_firefox(playwright, date, headless)
+
+def get_firefox(playwright, date, headless):
+    browser = playwright.firefox.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_firefox_profile(),
         headless=headless,
         args=["--new-tab"],
@@ -25,11 +34,22 @@ def get_browser_and_page(playwright, date, headless):
     page = browser.pages[0]
     return browser, page
 
+def get_chromium(playwright, date, headless):
+    browser = playwright.chromium.launch_persistent_context(
+        user_data_dir=PROFILE_PATH or _get_default_chromium_profile(),
+        headless=headless,
+    )
+    return browser, browser.new_page()
 
 def _get_default_firefox_profile():
-    profile_path = path.expanduser("~/Library/Application Support/Firefox/Profiles")
+    macos_profile_path = "~/Library/Application Support/Firefox/Profiles"
+    linux_profile_path = "~/.mozilla/firefox"
+
+    profile_path = path.expanduser(macos_profile_path)
     if not path.exists(profile_path):
-        raise Exception("Firefox profiles directory not found.")
+        profile_path = path.expanduser(linux_profile_path)
+        if not path.exists(profile_path):
+            raise Exception("Firefox profiles directory not found.")
 
     default_profiles = glob(path.join(profile_path, "*.default"))
     if not default_profiles:
@@ -37,6 +57,21 @@ def _get_default_firefox_profile():
 
     return default_profiles[0]
 
+def _get_default_chromium_profile():
+    macos_profile_path = "~/Library/Application Support/Chromium"
+    linux_profile_path = "~/.config/chromium"
+
+    profile_path = path.expanduser(macos_profile_path)
+    if not path.exists(profile_path):
+        profile_path = path.expanduser(linux_profile_path)
+        if not path.exists(profile_path):
+            raise Exception("Chromium profiles directory not found.")
+
+    default_profiles = glob(path.join(profile_path, "Default"))
+    if not default_profiles:
+        raise Exception("Default profile not found.")
+
+    return default_profiles[0]
 
 def get_current_user_id(page):
     page.goto("https://sysdig.bizneohr.com")
