@@ -3,6 +3,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     poetry2nix-python.url = "github:nix-community/poetry2nix";
     utils.url = "github:numtide/flake-utils";
+    playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
+    playwrightOverwrite.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -10,13 +12,18 @@
     nixpkgs,
     poetry2nix-python,
     utils,
-  }: let
+    ...
+  } @ inputs: let
     flake = utils.lib.eachDefaultSystem (
       system: let
+        latestPlaywrightVersion = final: prev: {
+          playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
+        };
+
         pkgs = import nixpkgs {
           inherit system;
           config.allowUnfree = true;
-          overlays = [poetry2nix-python.overlays.default];
+          overlays = [poetry2nix-python.overlays.default latestPlaywrightVersion];
         };
 
         bizneo = pkgs.callPackage ./bizneo.nix {};
@@ -39,7 +46,6 @@
               })
               poetry
               pre-commit
-              bizneo
             ];
           };
 
