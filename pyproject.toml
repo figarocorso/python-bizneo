@@ -18,6 +18,7 @@ requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 python-lsp-server = "^1.11.0"
+black = "^24.4.2"
 
 [tool.poetry.scripts]
 bizneo = "bizneo:cli"
