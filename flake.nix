@@ -4,7 +4,6 @@
     poetry2nix-python.url = "github:nix-community/poetry2nix";
     utils.url = "github:numtide/flake-utils";
     playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
-    playwrightOverwrite.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
