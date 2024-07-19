@@ -25,6 +25,7 @@ def get_browser_and_page(playwright, date, headless, browser):
     print(f"Warning: unsupported browser specified: {browser}, will fallback to firefox")
     return get_firefox(playwright, date, headless)
 
+
 def get_firefox(playwright, date, headless):
     browser = playwright.firefox.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_firefox_profile(),
@@ -34,12 +35,14 @@ def get_firefox(playwright, date, headless):
     page = browser.pages[0]
     return browser, page
 
+
 def get_chromium(playwright, date, headless):
     browser = playwright.chromium.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_chromium_profile(),
         headless=headless,
     )
     return browser, browser.new_page()
+
 
 def _get_default_firefox_profile():
     macos_profile_path = "~/Library/Application Support/Firefox/Profiles"
@@ -57,6 +60,7 @@ def _get_default_firefox_profile():
 
     return default_profiles[0]
 
+
 def _get_default_chromium_profile():
     macos_profile_path = "~/Library/Application Support/Chromium"
     linux_profile_path = "~/.config/chromium"
@@ -72,6 +76,7 @@ def _get_default_chromium_profile():
         raise Exception("Default profile not found.")
 
     return default_profiles[0]
+
 
 def get_current_user_id(page):
     page.goto("https://sysdig.bizneohr.com")

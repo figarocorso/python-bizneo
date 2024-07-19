@@ -104,9 +104,21 @@ def parse_date_today(ctx, param, value):
 
 
 @browser.command()
-@click.option("--date", type=str, callback=parse_date_today, required=False, help="Date in format YYYY-M-D (Default: today)")
+@click.option(
+    "--date",
+    type=str,
+    callback=parse_date_today,
+    required=False,
+    help="Date in format YYYY-M-D (Default: today)",
+)
 @click.option("--headless", is_flag=True, required=False, help="Run browser in headless mode")
-@click.option("--browser", type=str, required=False, default="firefox", help="What kind of browser should be run: firefox, chromium")
+@click.option(
+    "--browser",
+    type=str,
+    required=False,
+    default="firefox",
+    help="What kind of browser should be run: firefox, chromium",
+)
 def expected(date: str, headless: bool, browser: Literal["firefox", "chromium"]):
     add_expected_schedule(date, headless, browser)
 

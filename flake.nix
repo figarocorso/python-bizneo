@@ -45,6 +45,7 @@
               })
               poetry
               pre-commit
+              black
             ];
           };
 
