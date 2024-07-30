@@ -1,6 +1,6 @@
 from os import path
 from glob import glob
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 
 
 PROFILE_PATH = ""
@@ -87,19 +87,40 @@ def get_current_user_id(page):
 def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
     page.goto(f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user_id}?year={year}&month={month}")
     page.reload()
+    ok = register_schedule(page, user_id, year, month, day)
+    if not ok:
+        return
+    check_registration_was_ok(page, user_id, year, month, day)
+
+
+def register_schedule(page, user_id, year, month, day):
     year_month_day = f"{year:04d}-{month:02d}-{day:02d}"
     page.locator(f"//tr[@data-bulk-element='{year_month_day}']/td[@class='actions']").click()
     add_default_schedule_selector = f"//form[contains(@action, '={year_month_day}')]//button[contains(@class, 'is-link')][contains(text(), 'jornada esperada')]"  # noqa
     if not any_locator_is_visible(page, add_default_schedule_selector):
         print("Schedule was already registered")
-        return
+        return False
 
-    print(f"Adding expected schedule for user {user_id} at {year}-{month}-{day}")
     for element in page.locator(add_default_schedule_selector).all():
         if element.is_visible():
             element.click()
+
     page.locator("//button[contains(text(), 'Confirmar')]").click()
-    page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]").wait_for_element_state("visible")
+
+    return True
+
+
+def check_registration_was_ok(page, user_id, year, month, day):
+    try:
+        ok_toast = page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]", timeout=5000)
+        ok_toast.wait_for_element_state("visible", timeout=3000)
+        print(f"Added expected schedule for user {user_id} at {year}-{month}-{day}")
+    except TimeoutError:
+        ok_toast = page.wait_for_selector(
+            "//*[contains(text(), 'No es posible registrar horas')]", timeout=5000
+        )
+        ok_toast.wait_for_element_state("visible", timeout=3000)
+        print("Could not register schedule (probably you have an oabsence on that day)")
 
 
 def any_locator_is_visible(page, selector):
