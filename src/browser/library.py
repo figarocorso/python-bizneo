@@ -1,6 +1,6 @@
 from os import path
 from glob import glob
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 
 
 PROFILE_PATH = ""
@@ -94,12 +94,21 @@ def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
         print("Schedule was already registered")
         return
 
-    print(f"Adding expected schedule for user {user_id} at {year}-{month}-{day}")
     for element in page.locator(add_default_schedule_selector).all():
         if element.is_visible():
             element.click()
+
     page.locator("//button[contains(text(), 'Confirmar')]").click()
-    page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]").wait_for_element_state("visible")
+    try:
+        ok_toast = page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]", timeout=5000)
+        ok_toast.wait_for_element_state("visible", timeout=3000)
+        print(f"Added expected schedule for user {user_id} at {year}-{month}-{day}")
+    except TimeoutError:
+        ok_toast = page.wait_for_selector(
+            "//*[contains(text(), 'No es posible registrar horas')]", timeout=5000
+        )
+        ok_toast.wait_for_element_state("visible", timeout=3000)
+        print("Could not register schedule (probably you have an oabsence on that day)")
 
 
 def any_locator_is_visible(page, selector):
