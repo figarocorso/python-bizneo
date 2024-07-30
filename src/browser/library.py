@@ -87,7 +87,9 @@ def get_current_user_id(page):
 def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
     page.goto(f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user_id}?year={year}&month={month}")
     page.reload()
-    register_schedule(page, user_id, year, month, day)
+    ok = register_schedule(page, user_id, year, month, day)
+    if not ok:
+        return
     check_registration_was_ok(page, user_id, year, month, day)
 
 
@@ -97,13 +99,15 @@ def register_schedule(page, user_id, year, month, day):
     add_default_schedule_selector = f"//form[contains(@action, '={year_month_day}')]//button[contains(@class, 'is-link')][contains(text(), 'jornada esperada')]"  # noqa
     if not any_locator_is_visible(page, add_default_schedule_selector):
         print("Schedule was already registered")
-        return
+        return False
 
     for element in page.locator(add_default_schedule_selector).all():
         if element.is_visible():
             element.click()
 
     page.locator("//button[contains(text(), 'Confirmar')]").click()
+
+    return True
 
 
 def check_registration_was_ok(page, user_id, year, month, day):
