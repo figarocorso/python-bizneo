@@ -61,6 +61,8 @@
         bizneo = self.packages.${prev.system}.bizneo;
       };
     };
+
+    nixosModules.bizneo = import ./bizneo-module.nix flake;
   in
-    flake // {inherit overlays;};
+    flake // {inherit overlays nixosModules;};
 }
