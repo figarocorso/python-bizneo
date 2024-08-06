@@ -51,7 +51,7 @@ in
 
     environment.systemPackages = [ cfg.package ];
 
-    systemd.user.services.bizneo = {
+    systemd.user.services."bizneo@" = {
       description = "Execute bizneo browser command";
       serviceConfig = {
         Type = "oneshot";
@@ -70,7 +70,7 @@ in
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = cfg.schedule;
-        Unit = "bizneo.service";
+        Unit = "bizneo@%i.service";
       };
     };
   };
