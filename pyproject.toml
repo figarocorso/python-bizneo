@@ -1,4 +1,4 @@
-[tool.black]
+[tool.ruff]
 line-length = 110
 
 [tool.poetry]
@@ -18,7 +18,7 @@ requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 python-lsp-server = "^1.11.0"
-black = "^24.4.2"
+ruff = "^0.5.6"
 
 [tool.poetry.scripts]
 bizneo = "bizneo:cli"
