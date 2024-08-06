@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    poetry2nix-python.url = "github:nix-community/poetry2nix";
+    poetry2nix-python.url = "github:nix-community/poetry2nix/566f8c051a402e929716aa33935aa570fbd1ce1a"; # PR https://github.com/nix-community/poetry2nix/pull/1766
     poetry2nix-python.inputs.flake-utils.follows = "utils";
     poetry2nix-python.inputs.nixpkgs.follows = "nixpkgs";
     poetry2nix-python.inputs.systems.follows = "utils/systems";
@@ -34,8 +34,6 @@
             ];
           };
 
-          p2n-overrides = pkgs.poetry2nix.defaultPoetryOverrides.extend (final: prev: { ruff = pkgs.ruff; });
-
           bizneo = pkgs.callPackage ./bizneo.nix { };
         in
         {
@@ -55,7 +53,6 @@
                 (poetry2nix.mkPoetryEnv {
                   projectDir = ./.;
                   python = python3;
-                  overrides = p2n-overrides;
                 })
                 poetry
                 pre-commit
