@@ -9,60 +9,66 @@
     playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    poetry2nix-python,
-    utils,
-    ...
-  } @ inputs: let
-    flake = utils.lib.eachDefaultSystem (
-      system: let
-        latestPlaywrightVersion = final: prev: {
-          playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
-        };
+  outputs =
+    {
+      self,
+      nixpkgs,
+      poetry2nix-python,
+      utils,
+      ...
+    }@inputs:
+    let
+      flake = utils.lib.eachDefaultSystem (
+        system:
+        let
+          latestPlaywrightVersion = final: prev: {
+            playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
+          };
 
-        pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays = [poetry2nix-python.overlays.default latestPlaywrightVersion];
-        };
-
-        bizneo = pkgs.callPackage ./bizneo.nix {};
-      in {
-        packages = {
-          inherit bizneo;
-          default = bizneo;
-        };
-
-        devShells.default = with pkgs;
-          mkShellNoCC {
-            shellHook = ''
-              pre-commit install
-            '';
-
-            packages = [
-              (poetry2nix.mkPoetryEnv {
-                projectDir = ./.;
-                python = python3;
-              })
-              poetry
-              pre-commit
-              black
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+            overlays = [
+              poetry2nix-python.overlays.default
+              latestPlaywrightVersion
             ];
           };
 
-        formatter = pkgs.alejandra;
-      }
-    );
+          bizneo = pkgs.callPackage ./bizneo.nix { };
+        in
+        {
+          packages = {
+            inherit bizneo;
+            default = bizneo;
+          };
 
-    overlays = {
-      default = final: prev: {
-        bizneo = self.packages.${prev.system}.bizneo;
+          devShells.default =
+            with pkgs;
+            mkShellNoCC {
+              shellHook = ''
+                pre-commit install
+              '';
+
+              packages = [
+                (poetry2nix.mkPoetryEnv {
+                  projectDir = ./.;
+                  python = python3;
+                })
+                poetry
+                pre-commit
+                black
+              ];
+            };
+
+          formatter = pkgs.nixfmt-rfc-style;
+        }
+      );
+
+      overlays = {
+        default = final: prev: { bizneo = self.packages.${prev.system}.bizneo; };
       };
-    };
 
-    nixosModules.bizneo = import ./bizneo-module.nix flake;
-  in
-    flake // {inherit overlays nixosModules;};
+      nixosModules.bizneo = import ./bizneo-module.nix flake;
+    in
+    flake // { inherit overlays nixosModules; };
 }

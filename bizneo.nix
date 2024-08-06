@@ -3,20 +3,21 @@
   python3,
   writeShellApplication,
   playwright-driver,
-}: let
+}:
+let
   bizneo = poetry2nix.mkPoetryApplication {
     projectDir = ./.;
     python = python3;
     meta.mainProgram = "bizneo";
   };
 in
-  writeShellApplication {
-    name = "bizneo";
-    runtimeInputs = [playwright-driver.browsers];
-    text = ''
-      export PLAYWRIGHT_BROWSERS_PATH=${playwright-driver.browsers}
-      export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+writeShellApplication {
+  name = "bizneo";
+  runtimeInputs = [ playwright-driver.browsers ];
+  text = ''
+    export PLAYWRIGHT_BROWSERS_PATH=${playwright-driver.browsers}
+    export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
 
-      exec ${bizneo}/bin/bizneo "$@"
-    '';
-  }
+    exec ${bizneo}/bin/bizneo "$@"
+  '';
+}
