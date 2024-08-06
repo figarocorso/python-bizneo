@@ -34,6 +34,8 @@
             ];
           };
 
+          p2n-overrides = pkgs.poetry2nix.defaultPoetryOverrides.extend (final: prev: { ruff = pkgs.ruff; });
+
           bizneo = pkgs.callPackage ./bizneo.nix { };
         in
         {
@@ -53,10 +55,11 @@
                 (poetry2nix.mkPoetryEnv {
                   projectDir = ./.;
                   python = python3;
+                  overrides = p2n-overrides;
                 })
                 poetry
                 pre-commit
-                black
+                ruff
               ];
             };
 
