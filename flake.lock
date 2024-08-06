@@ -39,11 +39,11 @@
     },
     "playwrightOverwrite": {
       "locked": {
-        "lastModified": 1721082921,
-        "narHash": "sha256-cAsmTTdRd3PN5jSeVnw7cgm+DrFRlvFKG3/1whOvSxc=",
+        "lastModified": 1722977364,
+        "narHash": "sha256-5LNEJhZYkGGX3fKGChaxK30u2FCeiN45PTd7is8gBUU=",
         "owner": "tembleking",
         "repo": "nixpkgs",
-        "rev": "a99ee713f82a732cecf76d8746f9100e2a082b25",
+        "rev": "eec4b7567b7e05954f916621c1951d6d3943d3c2",
         "type": "github"
       },
       "original": {
