@@ -114,7 +114,7 @@ def check_registration_was_ok(page, user_id, year, month, day):
     try:
         ok_toast = page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]", timeout=5000)
         ok_toast.wait_for_element_state("visible", timeout=3000)
-        print(f"Added expected schedule for user {user_id} at {year}-{month}-{day}")
+        print(f"Added expected schedule for user {user_id} at {year}-{month:02d}-{day:02d}")
     except TimeoutError:
         ok_toast = page.wait_for_selector(
             "//*[contains(text(), 'No es posible registrar horas')]", timeout=5000
