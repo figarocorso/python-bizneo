@@ -7,10 +7,15 @@
         flake-utils.follows = "utils";
         nixpkgs.follows = "nixpkgs";
         systems.follows = "utils/systems";
+        nix-github-actions.follows = "nix-github-actions";
       };
     };
     utils.url = "github:numtide/flake-utils";
     playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -22,6 +27,15 @@
       ...
     }@inputs:
     let
+      supportedPythonVersions = [
+        "python3"
+        "python310"
+        "python311"
+        "python312"
+        "python313"
+      ];
+      forAllSupportedPythonVersions = nixpkgs.lib.genAttrs supportedPythonVersions;
+
       flake = utils.lib.eachDefaultSystem (
         system:
         let
@@ -39,6 +53,13 @@
           };
 
           bizneo = pkgs.callPackage ./bizneo.nix { };
+          checkPackageForAllSupportedVersions =
+            pkg:
+            nixpkgs.lib.mapAttrs' (name: value: nixpkgs.lib.nameValuePair ("${pkg}-" + name) value) (
+              forAllSupportedPythonVersions (
+                pythonVersion: self.packages.${system}.${pkg}.override { python3 = pkgs.${pythonVersion}; }
+              )
+            );
         in
         {
           packages = {
@@ -46,6 +67,7 @@
             default = bizneo;
           };
 
+          checks = checkPackageForAllSupportedVersions "bizneo";
           devShells.default =
             with pkgs;
             mkShellNoCC {
@@ -73,6 +95,14 @@
       };
 
       nixosModules.bizneo = import ./bizneo-module.nix flake;
+
+      githubActions = inputs.nix-github-actions.lib.mkGithubMatrix {
+        checks = nixpkgs.lib.getAttrs [
+          "x86_64-linux"
+          "x86_64-darwin"
+          "aarch64-darwin"
+        ] self.checks;
+      };
     in
-    flake // { inherit overlays nixosModules; };
+    flake // { inherit overlays nixosModules githubActions; };
 }
