@@ -9,6 +9,14 @@ let
     projectDir = ./.;
     python = python3;
     meta.mainProgram = "bizneo";
+
+    doInstallCheck = true;
+    installCheckPhase = ''
+      $out/bin/bizneo --help
+      $out/bin/bizneo admin --help
+      $out/bin/bizneo browser --help
+      $out/bin/bizneo browser expected --help
+    '';
   };
 in
 writeShellApplication {
