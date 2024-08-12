@@ -11,7 +11,7 @@ readme = "README.md"
 packages = [{include = "./**/*"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 click = "^8.1.7"
 playwright = "^1.45.0"
 requests = "^2.32.3"

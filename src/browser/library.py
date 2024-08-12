@@ -1,9 +1,19 @@
+from typing import List
 from os import path
 from glob import glob
 from playwright.sync_api import sync_playwright, TimeoutError
 
 
 PROFILE_PATH = ""
+CHROMIUM_MACOS_PROFILE_PATH = "~/Library/Application Support/Chromium"
+CHROMIUM_LINUX_PROFILE_PATH = "~/.config/chromium"
+CHROMIUM_LINUX_SNAP_PROFILE_PATH = "~/snap/chromium/common/chromium"
+CHROMIUM_PATHS = [CHROMIUM_MACOS_PROFILE_PATH, CHROMIUM_LINUX_PROFILE_PATH, CHROMIUM_LINUX_SNAP_PROFILE_PATH]
+
+FIREFOX_MACOS_PROFILE_PATH = "~/Library/Application Support/Firefox/Profiles"
+FIREFOX_LINUX_PROFILE_PATH = "~/.mozilla/firefox"
+FIREFOX_LINUX_SNAP_PROFILE_PATH = "~/snap/firefox/common/.mozilla/firefox/"
+FIREFOX_PATHS = [FIREFOX_MACOS_PROFILE_PATH, FIREFOX_LINUX_PROFILE_PATH, FIREFOX_LINUX_SNAP_PROFILE_PATH]
 
 
 def add_expected_schedule(date, headless, browser):
@@ -44,16 +54,16 @@ def get_chromium(playwright, date, headless):
     return browser, browser.new_page()
 
 
+def _profile_path(paths: List[str]) -> str:
+    for profile_path in paths:
+        profile_path = path.expanduser(profile_path)
+        if path.exists(profile_path):
+            return profile_path
+    raise Exception("Profiles directory not found.")
+
+
 def _get_default_firefox_profile():
-    macos_profile_path = "~/Library/Application Support/Firefox/Profiles"
-    linux_profile_path = "~/.mozilla/firefox"
-
-    profile_path = path.expanduser(macos_profile_path)
-    if not path.exists(profile_path):
-        profile_path = path.expanduser(linux_profile_path)
-        if not path.exists(profile_path):
-            raise Exception("Firefox profiles directory not found.")
-
+    profile_path = _profile_path(FIREFOX_PATHS)
     default_profiles = glob(path.join(profile_path, "*.default"))
     if not default_profiles:
         raise Exception("Default profile not found.")
@@ -62,15 +72,7 @@ def _get_default_firefox_profile():
 
 
 def _get_default_chromium_profile():
-    macos_profile_path = "~/Library/Application Support/Chromium"
-    linux_profile_path = "~/.config/chromium"
-
-    profile_path = path.expanduser(macos_profile_path)
-    if not path.exists(profile_path):
-        profile_path = path.expanduser(linux_profile_path)
-        if not path.exists(profile_path):
-            raise Exception("Chromium profiles directory not found.")
-
+    profile_path = _profile_path(CHROMIUM_PATHS)
     default_profiles = glob(path.join(profile_path, "Default"))
     if not default_profiles:
         raise Exception("Default profile not found.")
