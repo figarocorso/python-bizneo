@@ -1,3 +1,4 @@
+from typing import List
 from os import path
 from glob import glob
 from playwright.sync_api import sync_playwright, TimeoutError
@@ -7,7 +8,7 @@ PROFILE_PATH = ""
 CHROMIUM_MACOS_PROFILE_PATH = "~/Library/Application Support/Chromium"
 CHROMIUM_LINUX_PROFILE_PATH = "~/.config/chromium"
 CHROMIUM_LINUX_SNAP_PROFILE_PATH = "~/snap/chromium/common/chromium"
-CHROMIUM_PATHS= [CHROMIUM_MACOS_PROFILE_PATH, CHROMIUM_LINUX_PROFILE_PATH, CHROMIUM_LINUX_SNAP_PROFILE_PATH]
+CHROMIUM_PATHS = [CHROMIUM_MACOS_PROFILE_PATH, CHROMIUM_LINUX_PROFILE_PATH, CHROMIUM_LINUX_SNAP_PROFILE_PATH]
 
 FIREFOX_MACOS_PROFILE_PATH = "~/Library/Application Support/Firefox/Profiles"
 FIREFOX_LINUX_PROFILE_PATH = "~/.mozilla/firefox"
@@ -52,12 +53,14 @@ def get_chromium(playwright, date, headless):
     )
     return browser, browser.new_page()
 
+
 def _profile_path(paths: List[str]) -> str:
     for profile_path in paths:
         profile_path = path.expanduser(profile_path)
         if path.exists(profile_path):
             return profile_path
     raise Exception("Profiles directory not found.")
+
 
 def _get_default_firefox_profile():
     profile_path = _profile_path(FIREFOX_PATHS)
@@ -66,7 +69,6 @@ def _get_default_firefox_profile():
         raise Exception("Default profile not found.")
 
     return default_profiles[0]
-
 
 
 def _get_default_chromium_profile():
