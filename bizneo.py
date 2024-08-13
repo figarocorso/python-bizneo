@@ -114,7 +114,7 @@ def parse_date_today(ctx, param, value):
 @click.option("--headless", is_flag=True, required=False, help="Run browser in headless mode")
 @click.option(
     "--browser",
-    type=str,
+    type=click.Choice(["firefox", "chromium"]),
     required=False,
     default="firefox",
     help="What kind of browser should be run: firefox, chromium",

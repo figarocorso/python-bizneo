@@ -3,13 +3,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     poetry2nix-python = {
       url = "github:nix-community/poetry2nix";
-      inputs = {
-        flake-utils.follows = "utils";
-        nixpkgs.follows = "nixpkgs";
-        systems.follows = "utils/systems";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    utils.url = "github:numtide/flake-utils";
     playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
   };
 
@@ -18,61 +13,71 @@
       self,
       nixpkgs,
       poetry2nix-python,
-      utils,
       ...
     }@inputs:
     let
-      flake = utils.lib.eachDefaultSystem (
-        system:
-        let
-          latestPlaywrightVersion = final: prev: {
-            playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
-          };
+      supportedSystems = [
+        "x86_64-linux"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
 
-          pkgs = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-            overlays = [
-              poetry2nix-python.overlays.default
-              latestPlaywrightVersion
-            ];
-          };
+      latestPlaywrightVersion = final: prev: {
+        playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
+      };
 
-          bizneo = pkgs.callPackage ./bizneo.nix { };
-        in
-        {
-          packages = {
-            inherit bizneo;
-            default = bizneo;
-          };
-
-          devShells.default =
-            with pkgs;
-            mkShellNoCC {
-              shellHook = ''
-                pre-commit install
-              '';
-
-              packages = [
-                (poetry2nix.mkPoetryEnv {
-                  projectDir = ./.;
-                  python = python3;
-                })
-                poetry
-                pre-commit
-                ruff
+      forEachSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          let
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [
+                poetry2nix-python.overlays.default
+                latestPlaywrightVersion
+                self.overlays.default
               ];
             };
+          in
+          f pkgs
+        );
+    in
+    {
+      overlays.default = final: prev: { bizneo = final.pkgs.callPackage ./bizneo.nix { }; };
+      nixosModules.bizneo = import ./bizneo-module.nix self;
 
-          formatter = pkgs.nixfmt-rfc-style;
+      packages = forEachSystem (
+        pkgs: with pkgs; {
+          inherit bizneo;
+          default = bizneo;
         }
       );
 
-      overlays = {
-        default = final: prev: { bizneo = self.packages.${prev.system}.bizneo; };
-      };
+      checks = forEachSystem (
+        pkgs: with pkgs; {
+          inherit bizneo;
+        }
+      );
 
-      nixosModules.bizneo = import ./bizneo-module.nix flake;
-    in
-    flake // { inherit overlays nixosModules; };
+      devShells = forEachSystem (
+        pkgs: with pkgs; {
+          default = mkShellNoCC {
+            shellHook = ''
+              pre-commit install
+            '';
+
+            packages = [
+              (poetry2nix.mkPoetryEnv { projectDir = ./.; })
+              poetry
+              pre-commit
+              ruff
+            ];
+          };
+        }
+      );
+
+      formatter = forEachSystem (pkgs: pkgs.nixfmt-rfc-style);
+    };
 }
