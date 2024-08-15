@@ -122,7 +122,7 @@ def check_registration_was_ok(page, user_id, year, month, day):
             "//*[contains(text(), 'No es posible registrar horas')]", timeout=5000
         )
         ok_toast.wait_for_element_state("visible", timeout=3000)
-        print("Could not register schedule (probably you have an oabsence on that day)")
+        print("Could not register schedule (probably you have an absence on that day)")
 
 
 def any_locator_is_visible(page, selector):
