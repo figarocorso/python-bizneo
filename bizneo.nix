@@ -15,6 +15,8 @@ poetry2nix.mkPoetryApplication {
     makeWrapper
   ];
 
+  preferWheels = true;
+
   buildInputs = [ playwright-driver.browsers ];
 
   postInstall = ''
