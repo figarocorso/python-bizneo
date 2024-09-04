@@ -7,7 +7,7 @@ from typing import Literal
 import click
 
 from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
-from src.api.reports_tasks import get_time_report_for_taxon
+from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
 from src.browser.library import add_expected_schedule
 
@@ -61,7 +61,13 @@ def parse_dict(ctx, param, value):
 
 
 @time.command()
-@click.option("--taxon", type=str, required=True, help="Needle for a taxon/org name for the report")
+@click.option(
+    "--taxon",
+    type=str,
+    required=False,
+    default="",
+    help="Needle for a taxon/org name for the report (empty for all users)",
+)
 @click.option("--start_at", type=str, required=False, help="Start date for the report (empty for last week)")
 @click.option("--end_at", type=str, required=False, help="End date for the report (empty for last week)")
 @click.option(
@@ -85,7 +91,7 @@ def report(taxon, start_at, end_at, webhook, headers):
         start_at = last_monday.strftime("%Y-%m-%d")
         end_at = last_sunday.strftime("%Y-%m-%d")
 
-    report_text = get_time_report_for_taxon(taxon, start_at, end_at)
+    report_text = get_time_report(taxon, start_at, end_at)
     if not webhook:
         print(report_text)
         return

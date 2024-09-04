@@ -4,10 +4,12 @@ from src.api.bizneo_requestor import get_user_logged_times, get_user_schedules, 
 EXPECTED_WORKING_HOURS = 8.0
 
 
-def get_time_report_for_taxon(taxon, start_at, end_at):
+def get_time_report(taxon, start_at, end_at):
     message = f"Report for date range: [{start_at}, {end_at}]\n"
-    users_in_taxon = [user for user in get_users() if user.in_taxon(taxon)]
-    for user in users_in_taxon:
+    users_to_get_report = [user for user in get_users()]
+    if taxon:
+        users_to_get_report = [user for user in users_to_get_report if user.in_taxon(taxon)]
+    for user in users_to_get_report:
         schedules = get_user_schedules(user.user_id, start_at, end_at)
         logged_times = get_user_logged_times(user.user_id, start_at, end_at)
         issues = _get_report_user_issues(schedules, logged_times)
