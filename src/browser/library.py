@@ -103,7 +103,7 @@ def register_schedule(page, user_id, year, month, day):
         print("Schedule was already registered")
         return False
 
-    for element in page.locator(add_default_schedule_selector).all():
+    for element in page.locator(add_default_schedule_selector).element_handles():
         if element.is_visible():
             element.click()
 
@@ -126,4 +126,4 @@ def check_registration_was_ok(page, user_id, year, month, day):
 
 
 def any_locator_is_visible(page, selector):
-    return any([x.is_visible() for x in page.locator(selector).all()])
+    return any([x.is_visible() for x in page.locator(selector).element_handles()])
