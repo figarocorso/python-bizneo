@@ -5,7 +5,6 @@
       url = "github:nix-community/poetry2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    playwrightOverwrite.url = "github:tembleking/nixpkgs/playwright";
   };
 
   outputs =
@@ -13,8 +12,7 @@
       self,
       nixpkgs,
       poetry2nix-python,
-      ...
-    }@inputs:
+    }:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -22,10 +20,6 @@
         "aarch64-linux"
         "aarch64-darwin"
       ];
-
-      latestPlaywrightVersion = final: prev: {
-        playwright-driver = inputs.playwrightOverwrite.legacyPackages.${prev.system}.playwright-driver;
-      };
 
       forEachSystem =
         f:
@@ -36,7 +30,6 @@
               inherit system;
               overlays = [
                 poetry2nix-python.overlays.default
-                latestPlaywrightVersion
                 self.overlays.default
               ];
             };
