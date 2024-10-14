@@ -50,11 +50,13 @@
               '';
 
               packages = [
-                (poetry2nix.mkPoetryEnv { projectDir = ./.; })
                 poetry
                 pre-commit
                 ruff
+                bizneo
               ];
+
+              inputsFrom = [ bizneo ];
             };
           formatter = pkgs.nixfmt-rfc-style;
         }
