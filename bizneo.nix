@@ -38,5 +38,6 @@ poetry2nix.mkPoetryApplication {
     $out/bin/bizneo admin --help
     $out/bin/bizneo browser --help
     $out/bin/bizneo browser expected --help
+    $out/bin/bizneo browser login --help
   '';
 }

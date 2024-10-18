@@ -9,7 +9,7 @@ import click
 from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
 from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
-from src.browser.library import add_expected_schedule
+from src.browser.library import add_expected_schedule, login_into
 
 
 @click.group()
@@ -127,6 +127,18 @@ def parse_date_today(ctx, param, value):
 )
 def expected(date: str, headless: bool, browser: Literal["firefox", "chromium"]):
     add_expected_schedule(date, headless, browser)
+
+
+@browser.command()
+@click.option(
+    "--browser",
+    type=click.Choice(["firefox", "chromium"]),
+    required=False,
+    default="firefox",
+    help="What kind of browser should be run: firefox, chromium",
+)
+def login(browser: Literal["firefox", "chromium"]):
+    login_into(browser)
 
 
 if __name__ == "__main__":

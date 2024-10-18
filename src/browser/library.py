@@ -25,18 +25,31 @@ def add_expected_schedule(date, headless, browser):
         browser.close()
 
 
+def login_into(browser):
+    with sync_playwright() as playwright:
+        browser, page = get_browser_and_page(playwright, False, browser)
+        page.goto("https://sysdig.bizneohr.com", timeout=0)
+
+        # Wait for a specific element that indicates the user is logged in.
+        # Waiting for the button with specific classes to confirm login.
+        page.wait_for_selector(".button.is-link.current-user.dropdown-btn.no-arrow", timeout=0)
+        print("User successfully logged in.")
+
+        browser.close()
+
+
 # Fixme(fede): should we refactor this and move it to another module?
-def get_browser_and_page(playwright, date, headless, browser):
+def get_browser_and_page(playwright, headless, browser):
     if browser == "firefox":
-        return get_firefox(playwright, date, headless)
+        return get_firefox(playwright, headless)
     elif browser == "chromium":
-        return get_chromium(playwright, date, headless)
+        return get_chromium(playwright, headless)
 
     print(f"Warning: unsupported browser specified: {browser}, will fallback to firefox")
-    return get_firefox(playwright, date, headless)
+    return get_firefox(playwright, headless)
 
 
-def get_firefox(playwright, date, headless):
+def get_firefox(playwright, headless):
     browser = playwright.firefox.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_firefox_profile(),
         headless=headless,
@@ -46,7 +59,7 @@ def get_firefox(playwright, date, headless):
     return browser, page
 
 
-def get_chromium(playwright, date, headless):
+def get_chromium(playwright, headless):
     browser = playwright.chromium.launch_persistent_context(
         user_data_dir=PROFILE_PATH or _get_default_chromium_profile(),
         headless=headless,
