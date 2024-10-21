@@ -18,7 +18,7 @@ FIREFOX_PATHS = [FIREFOX_MACOS_PROFILE_PATH, FIREFOX_LINUX_PROFILE_PATH, FIREFOX
 
 def add_expected_schedule(date, headless, browser):
     with sync_playwright() as playwright:
-        browser, page = get_browser_and_page(playwright, date, headless, browser)
+        browser, page = get_browser_and_page(playwright, headless, browser)
         user_id = get_current_user_id(page)
         year, month, day = (date.year, date.month, date.day)
         add_expected_schedule_at_date_for_user(page, user_id, year, month, day)
