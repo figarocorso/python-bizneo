@@ -41,16 +41,32 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1728538411,
-        "narHash": "sha256-f0SBJz1eZ2yOuKUr5CA9BHULGXVSn6miBuUWdTyhUhU=",
+        "lastModified": 1729980323,
+        "narHash": "sha256-eWPRZAlhf446bKSmzw6x7RWEE4IuZgAp8NW3eXZwRAY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b69de56fac8c2b6f8fd27f2eca01dcda8e0a4221",
+        "rev": "86e78d3d2084ff87688da662cf78c2af085d8e73",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-plarwright-darwin-x86_64": {
+      "locked": {
+        "lastModified": 1729685729,
+        "narHash": "sha256-4NjxXuc8xZwVuzsXpNwdWeWJrK+AtfnZ5O2KX8aW/sU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d63a0168ad4d52120cc8feab7ffa4cc07b6600c0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "pull/349469/head",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -68,11 +84,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1728564116,
-        "narHash": "sha256-BkEqM5zUrYAwRKrfqi7hPOqjgD6+N0NCJvooaY8aQoE=",
+        "lastModified": 1729864203,
+        "narHash": "sha256-i4M+umKXCmCuhgLScYEu2Zs3YjLn6pUuW3WbHlI7+KU=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "8a18db56dd62edd26458a87e4d335b7df84c3f3f",
+        "rev": "bd042208f7972e787089db39a43726b70228148d",
         "type": "github"
       },
       "original": {
@@ -85,6 +101,7 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-plarwright-darwin-x86_64": "nixpkgs-plarwright-darwin-x86_64",
         "poetry2nix-python": "poetry2nix-python"
       }
     },
