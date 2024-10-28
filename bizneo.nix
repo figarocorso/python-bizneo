@@ -4,6 +4,7 @@
   playwright-driver,
   installShellFiles,
   makeWrapper,
+  python3Packages,
 }:
 poetry2nix.mkPoetryApplication {
   projectDir = ./.;
@@ -18,6 +19,10 @@ poetry2nix.mkPoetryApplication {
   preferWheels = true;
 
   buildInputs = [ playwright-driver.browsers ];
+
+  overrides = poetry2nix.overrides.withDefaults (
+    self: super: { inherit (python3Packages) playwright; }
+  );
 
   postInstall = ''
     installShellCompletion --cmd bizneo \
