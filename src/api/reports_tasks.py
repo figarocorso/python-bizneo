@@ -33,5 +33,5 @@ def _get_report_user_issues(schedules, logged_times):
 
 def _get_report_user_string(user, start_at):
     year, month, _ = start_at.split("-")
-    url = f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user.user_id}?year={year}&month={month}"
+    url = f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user.user_id}?date={year}-{month}-01"
     return f"{user.first_name} {user.last_name}: {url}"
