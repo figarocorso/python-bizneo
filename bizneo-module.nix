@@ -38,7 +38,7 @@ in
 
       schedule = mkOption {
         type = types.str;
-        default = "Mon..Fri 12:00:00"; # Every work day at 12PM.
+        default = "Mon..Fri 08..18:00:00"; # Each hour from 8 to 18 on weekdays.
         description = "Schedule of when to launch the bizneo command.";
       };
 
@@ -61,7 +61,6 @@ in
           }
         '';
       };
-      wantedBy = [ "default.target" ];
     };
 
     # To enable with `systemctl enable --now --user bizneo-timer@<USERNAME>.timer`
