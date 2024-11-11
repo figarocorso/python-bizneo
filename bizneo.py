@@ -83,7 +83,8 @@ def parse_dict(ctx, param, value):
     required=False,
     help="Dict containing the headers to add to the request",
 )
-def report(taxon, start_at, end_at, webhook, headers):
+@click.option("--comment", type=str, default="", required=False, help="Customize first line output")
+def report(taxon, start_at, end_at, webhook, headers, comment):
     if not start_at or not end_at:
         today = datetime.now()
         last_monday = today - timedelta(days=today.weekday() + 7)
@@ -91,7 +92,7 @@ def report(taxon, start_at, end_at, webhook, headers):
         start_at = last_monday.strftime("%Y-%m-%d")
         end_at = last_sunday.strftime("%Y-%m-%d")
 
-    report_text = get_time_report(taxon, start_at, end_at)
+    report_text = get_time_report(taxon, start_at, end_at, comment)
     if not webhook:
         print(report_text)
         return
