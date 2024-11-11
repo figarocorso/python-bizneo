@@ -4,7 +4,7 @@ from src.api.bizneo_requestor import get_user_logged_times, get_user_schedules, 
 EXPECTED_WORKING_HOURS = 8.0
 
 
-def get_time_report(taxon, start_at, end_at):
+def get_time_report(taxon, start_at, end_at, comment):
     message = f"Report for date range: [{start_at}, {end_at}]\n"
     users_to_get_report = [user for user in get_users()]
     if taxon:
@@ -14,7 +14,7 @@ def get_time_report(taxon, start_at, end_at):
         logged_times = get_user_logged_times(user.user_id, start_at, end_at)
         issues = _get_report_user_issues(schedules, logged_times)
         if issues:
-            user_string = _get_report_user_string(user, start_at)
+            user_string = _get_report_user_string(user, start_at, comment)
             message += f"{user_string}\n{issues}"
 
     return message
@@ -31,7 +31,8 @@ def _get_report_user_issues(schedules, logged_times):
     return issues
 
 
-def _get_report_user_string(user, start_at):
+def _get_report_user_string(user, start_at, comment):
     year, month, _ = start_at.split("-")
     url = f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user.user_id}?date={year}-{month}-01"
-    return f"{user.first_name} {user.last_name}: {url}"
+    user_info = f"{user.first_name} {user.last_name}: {url}"
+    return f"{comment}\n{user_info}" if comment else user_info
