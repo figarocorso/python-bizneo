@@ -51,7 +51,7 @@ in
 
     environment.systemPackages = [ cfg.package ];
 
-    systemd.user.services."bizneo@" = {
+    systemd.user.services.bizneo = {
       description = "Execute bizneo browser command";
       serviceConfig = {
         Type = "oneshot";
@@ -63,13 +63,12 @@ in
       };
     };
 
-    # To enable with `systemctl enable --now --user bizneo-timer@<USERNAME>.timer`
-    systemd.user.timers."bizneo-timer@" = {
+    systemd.user.timers.bizneo-timer = {
       description = "Execute bizneo browser command every time this has been scheduled.";
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnCalendar = cfg.schedule;
-        Unit = "bizneo@%i.service";
+        Unit = "bizneo.service";
       };
     };
   };
