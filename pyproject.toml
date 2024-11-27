@@ -1,28 +1,35 @@
 [tool.ruff]
 line-length = 110
 
-[tool.poetry]
+[project]
 name = "python-bizneo"
 version = "0.1.0"
 description = ""
-authors = ["Miguel Julián <figarocorso@gmail.com>"]
-license = "GPL-3.0"
+authors = [
+    {name = "Miguel Julián", email = "figarocorso@gmail.com"},
+]
+license = {text = "GPL-3.0"}
+requires-python = "<4.0,>=3.10"
+dependencies = [
+    "click<9.0.0,>=8.1.7",
+    "playwright<2.0.0,>=1.45.0",
+    "requests<3.0.0,>=2.32.3",
+]
 readme = "README.md"
-packages = [{include = "./**/*"}]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-click = "^8.1.7"
-playwright = "^1.45.0"
-requests = "^2.32.3"
-
-[tool.poetry.group.dev.dependencies]
-python-lsp-server = "^1.11.0"
-ruff = "^0.5.6"
-
-[tool.poetry.scripts]
+[project.scripts]
 bizneo = "bizneo:cli"
 
+[dependency-groups]
+dev = [
+    "python-lsp-server>=1.11.0",
+    "ruff>=0.5.6",
+]
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "setuptools-scm>=7"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+py-modules = ["bizneo"]

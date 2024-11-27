@@ -3,11 +3,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-plarwright-darwin-x86_64.url = "github:NixOS/nixpkgs/pull/349469/head";
     flake-utils.url = "github:numtide/flake-utils";
-    poetry2nix-python = {
-      url = "github:nix-community/poetry2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
   };
 
   outputs =
@@ -15,7 +10,6 @@
       self,
       nixpkgs,
       flake-utils,
-      poetry2nix-python,
       ...
     }@inputs:
     let
@@ -38,7 +32,6 @@
             inherit system;
             config.allowUnfree = true;
             overlays = [
-              poetry2nix-python.overlays.default
               self.overlays.default
               temp-fix-playwright-darwin-x86_64
             ];
@@ -62,7 +55,7 @@
               '';
 
               packages = [
-                poetry
+                uv
                 pre-commit
                 ruff
                 bizneo
