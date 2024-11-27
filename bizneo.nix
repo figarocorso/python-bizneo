@@ -1,28 +1,31 @@
 {
-  poetry2nix,
-  python3,
-  playwright-driver,
-  installShellFiles,
   makeWrapper,
+  installShellFiles,
+  playwright-driver,
   python3Packages,
 }:
-poetry2nix.mkPoetryApplication {
-  projectDir = ./.;
-  python = python3;
-  meta.mainProgram = "bizneo";
+python3Packages.buildPythonApplication {
+  pname = "python-bizneo";
+  version = "0.1.0";
+  src = ./.;
+  pyproject = true;
+
+  build-system = with python3Packages; [
+    setuptools
+    setuptools-scm
+  ];
+
+  dependencies = with python3Packages; [
+    click
+    playwright
+    requests
+  ];
 
   nativeBuildInputs = [
     installShellFiles
     makeWrapper
   ];
-
-  preferWheels = true;
-
   buildInputs = [ playwright-driver.browsers ];
-
-  overrides = poetry2nix.overrides.withDefaults (
-    self: super: { inherit (python3Packages) playwright; }
-  );
 
   postInstall = ''
     installShellCompletion --cmd bizneo \
@@ -45,4 +48,6 @@ poetry2nix.mkPoetryApplication {
     $out/bin/bizneo browser expected --help
     $out/bin/bizneo browser login --help
   '';
+
+  meta.mainProgram = "bizneo";
 }

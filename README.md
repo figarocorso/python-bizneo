@@ -19,37 +19,29 @@ Ensure you have Python 3 installed and the required dependencies. Execute the CL
 
 ## Hacking
 
-The project dependencies are specified in a `pyproject.toml` file, which adheres to several Python PEPs, making it easy to manage and maintain the project. The most commonly used tool to handle this kind of projects is [Poetry](https://python-poetry.org/), which simplifies dependency management and setup.
+The project dependencies are specified in a `pyproject.toml` file, which adheres to several Python PEPs, making it easy to manage and maintain the project. The tool we are using in this project is [uv](https://docs.astral.sh/uv/), which simplifies dependency management and setup.
 
 To get started with development:
 
-1. Install the project dependencies:
+1. Activate the venv shell:
 
 ```sh
-poetry install
+uv venv
 ```
 
-2. Activate the Poetry shell:
+2. Run the CLI tool within the environment:
 
 ```sh
-poetry shell
+uv run bizneo
 ```
 
-Run the CLI tool within the Poetry environment:
+3. Build and package the tool:
 
 ```sh
-python <your_script_name>.py
+uv build
 ```
 
-## Explanation of Key Files
-
-#### bizneo.py
-
-This file is still under active development. It handles the core functionality of the CLI tool, specifically integrating with the Bizneo API to manage absences. To use this script, you need to add your Bizneo API token by looking for the `TOKEN` within the file and inserting your token value there.
-
-#### Browser automation
-
-This file is a temporary solution for supporting Google login to Bizneo. It uses a Firefox browser profile to maintain a logged-in session with Bizneo. You need to set the `PROFILE_PATH` to one of your existing Firefox profiles. Initially, you must log in to Bizneo manually. You might want to use `time.sleep(100000)` or insert a `breakpoint()` to pause the script and complete the manual login before proceeding. Note that this script is not yet headless, meaning it will open a visible browser window during execution.
+This will generate a dist/ folder with the sdist and the wheel.
 
 ## License
 
