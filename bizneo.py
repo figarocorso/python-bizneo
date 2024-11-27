@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = [
+#   "click<9.0.0,>=8.1.7",
+#   "playwright<2.0.0,>=1.45.0",
+#   "requests<3.0.0,>=2.32.3",
+# ]
+# ///
 
 import ast
 from datetime import datetime, timedelta
