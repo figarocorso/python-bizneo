@@ -1,7 +1,7 @@
 from typing import List
 from os import path
 from glob import glob
-from playwright.sync_api import sync_playwright, TimeoutError
+from playwright.sync_api import sync_playwright
 
 
 PROFILE_PATH = ""
@@ -19,9 +19,19 @@ FIREFOX_PATHS = [FIREFOX_MACOS_PROFILE_PATH, FIREFOX_LINUX_PROFILE_PATH, FIREFOX
 def add_expected_schedule(date, headless, browser):
     with sync_playwright() as playwright:
         browser, page = get_browser_and_page(playwright, headless, browser)
-        user_id = get_current_user_id(page)
-        year, month, day = (date.year, date.month, date.day)
-        add_expected_schedule_at_date_for_user(page, user_id, year, month, day)
+        page.goto("https://sysdig.bizneohr.com")
+
+        registered_locator = page.locator(
+            '//div[@class="day-header today"]//following-sibling::div[@class="registered"]'
+        )
+        if registered_locator.count() > 0:
+            print("Schedule already registered")
+            return
+
+        page.locator(f'//span[@hx-indicator="#spinner-day-{date.day}"]').click()
+        registered_locator.wait_for(state="visible")
+        print("Schedule registered")
+
         browser.close()
 
 
@@ -91,52 +101,3 @@ def _get_default_chromium_profile():
         raise Exception("Default profile not found.")
 
     return default_profiles[0]
-
-
-def get_current_user_id(page):
-    page.goto("https://sysdig.bizneohr.com")
-    time_xpath = "//a[contains(@class, 'menu-link')][contains(@data-active-link, 'time-attendance')]"
-    return page.locator(time_xpath).get_attribute("href").split("/")[-1]
-
-
-def add_expected_schedule_at_date_for_user(page, user_id, year, month, day):
-    page.goto(f"https://sysdig.bizneohr.com/time-attendance/my-logs/{user_id}?year={year}&month={month}")
-    page.reload()
-    ok = register_schedule(page, user_id, year, month, day)
-    if not ok:
-        return
-    check_registration_was_ok(page, user_id, year, month, day)
-
-
-def register_schedule(page, user_id, year, month, day):
-    year_month_day = f"{year:04d}-{month:02d}-{day:02d}"
-    page.locator(f"//tr[@data-bulk-element='{year_month_day}']/td[@class='actions']").click()
-    add_default_schedule_selector = f"//form[contains(@action, '={year_month_day}')]//button[contains(@class, 'is-link')][contains(text(), 'jornada esperada')]"  # noqa
-    if not any_locator_is_visible(page, add_default_schedule_selector):
-        print("Schedule was already registered")
-        return False
-
-    for element in page.locator(add_default_schedule_selector).element_handles():
-        if element.is_visible():
-            element.click()
-
-    page.locator("//button[contains(text(), 'Confirmar')]").click()
-
-    return True
-
-
-def check_registration_was_ok(page, user_id, year, month, day):
-    try:
-        ok_toast = page.wait_for_selector("//*[contains(text(), 'Has añadido con éxito')]", timeout=5000)
-        ok_toast.wait_for_element_state("visible", timeout=3000)
-        print(f"Added expected schedule for user {user_id} at {year}-{month:02d}-{day:02d}")
-    except TimeoutError:
-        ok_toast = page.wait_for_selector(
-            "//*[contains(text(), 'No es posible registrar horas')]", timeout=5000
-        )
-        ok_toast.wait_for_element_state("visible", timeout=3000)
-        print("Could not register schedule (probably you have an absence on that day)")
-
-
-def any_locator_is_visible(page, selector):
-    return any([x.is_visible() for x in page.locator(selector).element_handles()])
