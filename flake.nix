@@ -55,13 +55,19 @@
               '';
 
               packages = [
+                (python3.withPackages (
+                  p: with p; [
+                    jedi-language-server
+                    python-lsp-server
+                  ]
+                ))
                 uv
                 pre-commit
                 ruff
-                bizneo
               ];
 
               inputsFrom = [ bizneo ];
+
             };
           formatter = pkgs.nixfmt-rfc-style;
         }

@@ -5,14 +5,15 @@ from playwright.sync_api import sync_playwright
 
 
 PROFILE_PATH = ""
-CHROMIUM_MACOS_PROFILE_PATH = "~/Library/Application Support/Chromium"
-CHROMIUM_LINUX_PROFILE_PATH = "~/.config/chromium"
-CHROMIUM_LINUX_SNAP_PROFILE_PATH = "~/snap/chromium/common/chromium"
+HOME_PATH = path.expanduser("~")
+CHROMIUM_MACOS_PROFILE_PATH = f"{HOME_PATH}~/Library/Application Support/Chromium"
+CHROMIUM_LINUX_PROFILE_PATH = f"{HOME_PATH}/.config/chromium"
+CHROMIUM_LINUX_SNAP_PROFILE_PATH = f"{HOME_PATH}/snap/chromium/common/chromium"
 CHROMIUM_PATHS = [CHROMIUM_MACOS_PROFILE_PATH, CHROMIUM_LINUX_PROFILE_PATH, CHROMIUM_LINUX_SNAP_PROFILE_PATH]
 
-FIREFOX_MACOS_PROFILE_PATH = "~/Library/Application Support/Firefox/Profiles"
-FIREFOX_LINUX_PROFILE_PATH = "~/.mozilla/firefox"
-FIREFOX_LINUX_SNAP_PROFILE_PATH = "~/snap/firefox/common/.mozilla/firefox/"
+FIREFOX_MACOS_PROFILE_PATH = f"{HOME_PATH}/Library/Application Support/Firefox/Profiles"
+FIREFOX_LINUX_PROFILE_PATH = f"{HOME_PATH}/.mozilla/firefox"
+FIREFOX_LINUX_SNAP_PROFILE_PATH = f"{HOME_PATH}/snap/firefox/common/.mozilla/firefox/"
 FIREFOX_PATHS = [FIREFOX_MACOS_PROFILE_PATH, FIREFOX_LINUX_PROFILE_PATH, FIREFOX_LINUX_SNAP_PROFILE_PATH]
 
 
@@ -77,27 +78,17 @@ def get_chromium(playwright, headless):
     return browser, browser.new_page()
 
 
-def _profile_path(paths: List[str]) -> str:
+def _profile_path(paths: List[str], glob_subpath: str, default_path: str) -> str:
     for profile_path in paths:
         profile_path = path.expanduser(profile_path)
-        if path.exists(profile_path):
-            return profile_path
-    raise Exception("Profiles directory not found.")
+        if profile_path := glob(path.join(profile_path, glob_subpath)):
+            return profile_path[0]
+    return default_path
 
 
 def _get_default_firefox_profile():
-    profile_path = _profile_path(FIREFOX_PATHS)
-    default_profiles = glob(path.join(profile_path, "*.default"))
-    if not default_profiles:
-        raise Exception("Default profile not found.")
-
-    return default_profiles[0]
+    return _profile_path(FIREFOX_PATHS, "*.default", FIREFOX_LINUX_PROFILE_PATH)
 
 
 def _get_default_chromium_profile():
-    profile_path = _profile_path(CHROMIUM_PATHS)
-    default_profiles = glob(path.join(profile_path, "Default"))
-    if not default_profiles:
-        raise Exception("Default profile not found.")
-
-    return default_profiles[0]
+    return _profile_path(CHROMIUM_PATHS, "Default", CHROMIUM_LINUX_PROFILE_PATH)
