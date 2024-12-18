@@ -65,7 +65,7 @@ in
 
     systemd.user.timers.bizneo-timer = {
       description = "Execute bizneo browser command every time this has been scheduled.";
-      wantedBy = [ "timers.target" ];
+      wantedBy = [ "default.target" ];
       timerConfig = {
         OnCalendar = cfg.schedule;
         Unit = "bizneo.service";
