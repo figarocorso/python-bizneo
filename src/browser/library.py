@@ -17,19 +17,21 @@ FIREFOX_LINUX_SNAP_PROFILE_PATH = f"{HOME_PATH}/snap/firefox/common/.mozilla/fir
 FIREFOX_PATHS = [FIREFOX_MACOS_PROFILE_PATH, FIREFOX_LINUX_PROFILE_PATH, FIREFOX_LINUX_SNAP_PROFILE_PATH]
 
 
-def add_expected_schedule(date, headless, browser):
+def add_expected_schedule(headless, browser):
     with sync_playwright() as playwright:
         browser, page = get_browser_and_page(playwright, headless, browser)
         page.goto("https://sysdig.bizneohr.com")
 
-        registered_locator = page.locator(
-            '//div[@class="day-header today"]//following-sibling::div[@class="registered"]'
-        )
-        if registered_locator.count() > 0:
+        today_locator = '//div[@class="day-header today"]'
+
+        register_button = page.locator(today_locator + "//following-sibling::button")
+        if register_button.count() == 0:
             print("Schedule already registered")
             return
 
-        page.locator(f'//span[@hx-indicator="#spinner-day-{date.day}"]').click()
+        register_button.click()
+
+        registered_locator = page.locator(today_locator + '//following-sibling::div[@class="registered"]')
         registered_locator.wait_for(state="visible")
         print("Schedule registered")
 
