@@ -22,6 +22,10 @@ def add_expected_schedule(headless, browser):
         browser, page = get_browser_and_page(playwright, headless, browser)
         page.goto("https://sysdig.bizneohr.com")
 
+        if page.locator('//p[text()="Log in with"]').count() > 0:
+            print("User not logged in. Run bizneo browser login.")
+            return
+
         today_locator = '//div[@class="day-header today"]'
 
         register_button = page.locator(today_locator + "//following-sibling::button")
