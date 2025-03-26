@@ -48,11 +48,11 @@ in
   config = mkIf cfg.enable {
     nixpkgs.overlays = [ (final: prev: { bizneo = flake.packages.${prev.system}.bizneo; }) ];
 
-    environment.systemPackages = [ cfg.package ];
+    home.packages = [ cfg.package ];
 
     systemd.user.services.bizneo = {
-      description = "Execute bizneo browser command";
-      serviceConfig = {
+      Unit.Description = "Execute bizneo browser command";
+      Service = {
         Type = "oneshot";
         ExecStart = ''
           ${cfg.package}/bin/bizneo browser expected --browser ${cfg.browser} ${
@@ -63,12 +63,12 @@ in
     };
 
     systemd.user.timers.bizneo-timer = {
-      description = "Execute bizneo browser command every time this has been scheduled.";
-      wantedBy = [ "default.target" ];
-      timerConfig = {
+      Unit.Description = "Execute bizneo browser command every time this has been scheduled.";
+      Timer = {
         OnCalendar = cfg.schedule;
         Unit = "bizneo.service";
       };
+      Install.WantedBy = [ "default.target" ];
     };
   };
 }

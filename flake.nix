@@ -15,6 +15,7 @@
     let
       overlays.default = final: prev: { bizneo = prev.callPackage ./bizneo.nix { }; };
       nixosModules.bizneo = import ./bizneo-module.nix self;
+      homeManagerModules.bizneo = import ./bizneo-module-home.nix self;
 
       temp-fix-playwright-darwin-x86_64 =
         final: prev:
@@ -73,5 +74,5 @@
         }
       );
     in
-    flake // { inherit overlays nixosModules; };
+    flake // { inherit overlays nixosModules homeManagerModules; };
 }
