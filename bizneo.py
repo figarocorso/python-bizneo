@@ -7,7 +7,7 @@ from typing import Literal
 import click
 
 from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
-from src.api.bizneo_requestor import get_users
+from src.api.bizneo_requestor import get_user, get_users, update_user_slack_id
 from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
 from src.browser.library import add_expected_schedule, login_into
@@ -169,6 +169,33 @@ def list(taxon):
         click.echo(f"Taxons: {user.main_taxons or 'N/A'}")
         click.echo(f"Slack ID: {user.slack_id or 'N/A'}")
         click.echo("-" * 50)
+
+
+@users.command()
+@click.option("--email", type=str, required=True, help="Email of the user to update")
+@click.option("--slack-id", type=str, required=True, help="Slack ID to assign to the user")
+def update_slack(email, slack_id):
+    """Update Slack ID for a user identified by email."""
+    all_users = get_users()
+    user = next((u for u in all_users if u.email == email), None)
+
+    if not user:
+        click.echo(f"Error: User with email '{email}' not found")
+        return
+
+    click.echo(f"Found user: {user.first_name} {user.last_name} (ID: {user.user_id})")
+    click.echo(f"Current Slack ID: {user.slack_id or 'N/A'}")
+    click.echo(f"New Slack ID: {slack_id}")
+
+    try:
+        update_user_slack_id(user.user_id, slack_id)
+        click.echo("✅ Slack ID updated successfully!")
+
+        # Verify the update
+        updated_user = get_user(user.user_id)
+        click.echo(f"\nVerification - Updated Slack ID: {updated_user.slack_id or 'N/A'}")
+    except Exception as e:
+        click.echo(f"❌ Error updating Slack ID: {e}")
 
 
 if __name__ == "__main__":
