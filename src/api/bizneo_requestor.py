@@ -63,6 +63,14 @@ def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
     _post_request_json(f"{URL}/api/v1/users/{user_id}/absences{TOKEN_PARAMETER}", absence_data)
 
 
+def update_user_slack_id(user_id, slack_id):
+    print(f"updating slack_id for user {user_id} to {slack_id}")
+    user_data = {"user": {"slack_id": slack_id}}
+    response = _put_request_json(f"{URL}/api/v1/users/{user_id}{TOKEN_PARAMETER}", user_data)
+    print(f"API Response: {response}")
+    return response
+
+
 def _get_instance_list_from_paginated_get_request(url, data_dict_key, data_class):
     page_number = 1
     total_pages = 2
@@ -93,4 +101,13 @@ def _post_request_json(url, data):
             return {}
         raise RequestFailedException(f"Request {url} failed with status code {response.status_code}")
 
+    return response.json()
+
+
+def _put_request_json(url, data):
+    response = requests.put(url, headers=HEADERS, json=data)
+    if not response.ok:
+        raise RequestFailedException(
+            f"Request {url} failed with status code {response.status_code}: {response.text}"
+        )
     return response.json()
