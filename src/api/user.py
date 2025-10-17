@@ -8,6 +8,7 @@ class User:
     first_name: str
     last_name: str
     main_taxons: str
+    slack_id: str
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -16,6 +17,7 @@ class User:
             email=data.get("email"),
             first_name=data.get("first_name"),
             last_name=data.get("last_name"),
+            slack_id=data.get("slack_id"),
             main_taxons=data.get("main_taxons", ""),
         )
 

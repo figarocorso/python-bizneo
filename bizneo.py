@@ -7,6 +7,7 @@ from typing import Literal
 import click
 
 from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
+from src.api.bizneo_requestor import get_users
 from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
 from src.browser.library import add_expected_schedule, login_into
@@ -34,6 +35,11 @@ def absences():
 
 @admin.group()
 def time():
+    pass
+
+
+@admin.group()
+def users():
     pass
 
 
@@ -133,6 +139,36 @@ def expected(headless: bool, browser: Literal["firefox", "chromium"]):
 )
 def login(browser: Literal["firefox", "chromium"]):
     login_into(browser)
+
+
+@users.command()
+@click.option(
+    "--taxon",
+    type=str,
+    required=False,
+    default="",
+    help="Filter users by taxon/org name (empty for all users)",
+)
+def list(taxon):
+    """List all users or filter by taxon."""
+    all_users = get_users()
+    users_to_display = all_users if not taxon else [user for user in all_users if user.in_taxon(taxon)]
+
+    if not users_to_display:
+        if taxon:
+            click.echo(f"No users found for taxon: {taxon}")
+        else:
+            click.echo("No users found")
+        return
+
+    click.echo(f"Found {len(users_to_display)} user(s):\n")
+    for user in users_to_display:
+        click.echo(f"ID: {user.user_id}")
+        click.echo(f"Name: {user.first_name} {user.last_name}")
+        click.echo(f"Email: {user.email}")
+        click.echo(f"Taxons: {user.main_taxons or 'N/A'}")
+        click.echo(f"Slack ID: {user.slack_id or 'N/A'}")
+        click.echo("-" * 50)
 
 
 if __name__ == "__main__":
