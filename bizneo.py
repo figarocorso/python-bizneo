@@ -178,14 +178,28 @@ def individual_reports(comment, start_at, end_at, webhook, headers, taxon, dry_r
     error_no_slack_count = 0
 
     for user in users_with_slack:
-        # Generate individual report for this user
-        user_report = get_time_report(user.email.split("@")[0], start_at, end_at, comment)
+        # Generate individual report for this user using the same logic as test_single_user
+        from src.api.bizneo_requestor import get_user_schedules, get_user_logged_times
+        from src.api.reports_tasks import _get_report_user_issues, _get_report_user_string
+
+        schedules = get_user_schedules(user.user_id, start_at, end_at)
+        logged_times = get_user_logged_times(user.user_id, start_at, end_at)
+        issues = _get_report_user_issues(schedules, logged_times)
 
         # Check if user has issues to report
-        if not _has_time_issues(user_report):
+        if not issues:
             skip_count += 1
             click.echo(f"⏭️  Skipping {user.first_name} {user.last_name} - no issues")
             continue
+
+        # Build the report with issues
+        user_string = _get_report_user_string(user, start_at, "")
+        if comment:
+            user_report = (
+                f"{comment}\nReporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
+            )
+        else:
+            user_report = f"Reporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
 
         # Prepare headers with user's slack channel
         user_headers = headers.copy() if headers else {}
@@ -210,8 +224,10 @@ def individual_reports(comment, start_at, end_at, webhook, headers, taxon, dry_r
 
     # Check for users without Slack ID who have time issues
     for user in users_without_slack:
-        user_report = get_time_report(user.email.split("@")[0], start_at, end_at, comment)
-        if _has_time_issues(user_report):
+        schedules = get_user_schedules(user.user_id, start_at, end_at)
+        logged_times = get_user_logged_times(user.user_id, start_at, end_at)
+        issues = _get_report_user_issues(schedules, logged_times)
+        if issues:
             error_no_slack_count += 1
             click.echo(
                 f"⚠️  ERROR: {user.first_name} {user.last_name} ({user.email}) has time issues but NO Slack ID configured!"
@@ -225,11 +241,96 @@ def individual_reports(comment, start_at, end_at, webhook, headers, taxon, dry_r
     click.echo(f"  - Total users without Slack ID: {len(users_without_slack)}")
 
 
-def _has_time_issues(report_text):
-    """Check if report contains actual time issues (more than just the header)."""
-    lines = report_text.strip().split("\n")
-    # A report with issues has more than just the date range header
-    return len(lines) > 1
+@time.command()
+@click.option("--email", type=str, required=True, help="Email of the user to send the report to")
+@click.option("--comment", type=str, default="", required=False, help="Customize first line output")
+@click.option("--start_at", type=str, required=False, help="Start date for the report (empty for last week)")
+@click.option("--end_at", type=str, required=False, help="End date for the report (empty for last week)")
+@click.option(
+    "--webhook",
+    type=str,
+    required=True,
+    help="URL to send the report through POST request",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    required=False,
+    help="Print report to console instead of sending to webhook",
+)
+def test_single_user(email, comment, start_at, end_at, webhook, dry_run):
+    """Send time report to a single user via Slack (for testing webhook integration)."""
+    if not start_at or not end_at:
+        today = datetime.now()
+        last_monday = today - timedelta(days=today.weekday() + 7)
+        last_sunday = last_monday + timedelta(days=6)
+        start_at = last_monday.strftime("%Y-%m-%d")
+        end_at = last_sunday.strftime("%Y-%m-%d")
+
+    # Find user by email
+    all_users = get_users()
+    user_basic = next((u for u in all_users if u.email == email), None)
+
+    if not user_basic:
+        click.echo(f"❌ Error: User with email '{email}' not found")
+        return
+
+    # Get full user details to retrieve slack_id
+    user = get_user(user_basic.user_id)
+
+    if not user.slack_id:
+        click.echo(f"❌ Error: User {user.first_name} {user.last_name} has no Slack ID configured")
+        click.echo(
+            f"Use 'bizneo admin users update-slack --email {email} --slack-id <SLACK_ID>' to configure it"
+        )
+        return
+
+    # Generate report for this specific user
+    from src.api.bizneo_requestor import get_user_schedules, get_user_logged_times
+
+    schedules = get_user_schedules(user.user_id, start_at, end_at)
+    logged_times = get_user_logged_times(user.user_id, start_at, end_at)
+
+    # Check for time issues
+    from src.api.reports_tasks import _get_report_user_issues, _get_report_user_string
+
+    issues = _get_report_user_issues(schedules, logged_times)
+    user_report = ""
+
+    if issues:
+        user_string = _get_report_user_string(user, start_at, "")  # Don't pass comment to avoid duplication
+        if comment:
+            user_report = (
+                f"{comment}\nReporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
+            )
+        else:
+            user_report = f"Reporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
+
+    has_issues = bool(issues)
+
+    click.echo(f"User: {user.first_name} {user.last_name}")
+    click.echo(f"Email: {user.email}")
+    click.echo(f"Slack ID: {user.slack_id}")
+    click.echo(f"Date range: [{start_at}, {end_at}]")
+    click.echo(f"Has time issues: {'Yes' if has_issues else 'No'}")
+    click.echo(f"Dry-run mode: {'ON' if dry_run else 'OFF'}\n")
+
+    if dry_run:
+        click.echo(f"{'='*60}")
+        click.echo(f"DRY-RUN: Would send to {user.first_name} {user.last_name}")
+        click.echo(f"Webhook: {webhook}")
+        click.echo(f"\nReport content:\n{user_report}")
+        click.echo(f"{'='*60}\n")
+    else:
+        # Prepare headers with user's slack channel
+        headers = {"channel-id": user.slack_id}
+
+        ok, response = send_message_to_webhook(webhook, user_report, headers)
+        if ok:
+            click.echo(f"✅ Successfully sent report to {user.first_name} {user.last_name}")
+            click.echo(f"Response: {response}")
+        else:
+            click.echo(f"❌ Error sending report: {response}")
 
 
 def parse_date_today(ctx, param, value):
