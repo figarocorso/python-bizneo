@@ -46,13 +46,13 @@ This will generate a dist/ folder with the sdist and the wheel.
 
 ## Install and Configuring
 
-1. Clonar el repositorio:
+1. Clone the repository:
 
 ```sh
 git clone git@github.com:figarocorso/python-bizneo.git && cd python-bizneo
 ````
 
-2. Primer login:
+2. First login:
 
 ```sh
 uv run bizneo.py browser expected (hacer login manualmente en el navegador la primera vez)
@@ -61,12 +61,12 @@ or
 ```sh
 uv run bizneo.py browser login
 ````
-3. Añadir al cron:
+3. Add to cron:
 
 ```sh
 crontab -e 
 ```
-y agregar: 
+then, add in the file: 
 
 ```sh
 15 10-13 * * 1-5 sh -c 'cd $HOME/YOUR-PATH/python-bizneo && uv run bizneo.py browser expected --headless >> /tmp/bizneo-cron-output.log 2>&1'
