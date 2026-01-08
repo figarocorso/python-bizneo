@@ -43,6 +43,35 @@ uv build
 
 This will generate a dist/ folder with the sdist and the wheel.
 
+
+## Install and Configuring
+
+1. Clonar el repositorio:
+
+```sh
+git clone git@github.com:figarocorso/python-bizneo.git && cd python-bizneo
+````
+
+2. Primer login:
+
+```sh
+uv run bizneo.py browser expected (hacer login manualmente en el navegador la primera vez)
+````
+or
+```sh
+uv run bizneo.py browser login
+````
+3. Añadir al cron:
+
+```sh
+crontab -e 
+```
+y agregar: 
+
+```sh
+15 10-13 * * 1-5 sh -c 'cd $HOME/YOUR-PATH/python-bizneo && uv run bizneo.py browser expected --headless >> /tmp/bizneo-cron-output.log 2>&1'
+```
+
 ## License
 
 This project is licensed under the [GPL-3.0 License](LICENSE).
