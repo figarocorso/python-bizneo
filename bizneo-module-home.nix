@@ -12,8 +12,10 @@ let
     types
     mkEnableOption
     mkPackageOption
+    getExe
     ;
   cfg = config.services.bizneo;
+  isDarwin = pkgs.stdenv.isDarwin;
 in
 {
   options = {
@@ -50,7 +52,8 @@ in
 
     home.packages = [ cfg.package ];
 
-    systemd.user.services.bizneo = {
+    # Linux: systemd user services
+    systemd.user.services.bizneo = mkIf (!isDarwin) {
       Unit.Description = "Execute bizneo browser command";
       Service = {
         Type = "oneshot";
@@ -62,13 +65,31 @@ in
       };
     };
 
-    systemd.user.timers.bizneo-timer = {
+    systemd.user.timers.bizneo-timer = mkIf (!isDarwin) {
       Unit.Description = "Execute bizneo browser command every time this has been scheduled.";
       Timer = {
         OnCalendar = cfg.schedule;
         Unit = "bizneo.service";
       };
       Install.WantedBy = [ "default.target" ];
+    };
+
+    # macOS: launchd agent
+    launchd.agents.bizneo = mkIf isDarwin {
+      enable = true;
+      config = {
+        Label = "com.bizneo.browser";
+        ProgramArguments = [
+          (getExe cfg.package)
+          "browser"
+          "expected"
+          "--browser"
+          cfg.browser
+        ] ++ (if cfg.headless then [ "--headless" ] else [ ]);
+        StartCalendarInterval = lib.hm.darwin.mkCalendarInterval cfg.schedule;
+        StandardOutPath = "${config.home.homeDirectory}/Library/Logs/bizneo/stdout.log";
+        StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/bizneo/stderr.log";
+      };
     };
   };
 }
