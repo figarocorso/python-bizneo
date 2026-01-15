@@ -46,30 +46,29 @@ This will generate a dist/ folder with the sdist and the wheel.
 
 ## Install and Configuring
 
-1. Clone the repository:
+1. First login (manual browser login required the first time):
 
 ```sh
-git clone git@github.com:figarocorso/python-bizneo.git && cd python-bizneo
-````
+uvx --from git+https://github.com/figarocorso/python-bizneo.git bizneo browser login
+```
 
-2. First login:
+2. Run the tool:
 
 ```sh
-uv run bizneo.py browser expected (hacer login manualmente en el navegador la primera vez)
-````
-or
-```sh
-uv run bizneo.py browser login
-````
+uvx --from git+https://github.com/figarocorso/python-bizneo.git bizneo browser expected
+```
+
+You can optionally specify the browser with `--browser chromium` or `--browser firefox`.
+
 3. Add to cron:
 
 ```sh
-crontab -e 
+crontab -e
 ```
-then, add in the file: 
+then, add in the file:
 
 ```sh
-15 10-13 * * 1-5 sh -c 'cd $HOME/YOUR-PATH/python-bizneo && uv run bizneo.py browser expected --headless >> /tmp/bizneo-cron-output.log 2>&1'
+15 10-13 * * 1-5 uvx --from git+https://github.com/figarocorso/python-bizneo.git bizneo browser expected --headless >> /tmp/bizneo-cron-output.log 2>&1
 ```
 
 ## License
