@@ -1,5 +1,6 @@
 import requests
 
+from src.api.absence import Absence
 from src.api.absence_kind import AbsenceKind
 from src.api.logged_time import LoggedTime
 from src.api.schedule import Schedule
@@ -63,6 +64,18 @@ def request_absence_for_user(kind_id, start_at, end_at, comment, user_id):
     _post_request_json(f"{URL}/api/v1/users/{user_id}/absences{TOKEN_PARAMETER}", absence_data)
 
 
+def get_user_absences(user_id, start_at, end_at):
+    # The API doesn't have a direct endpoint for user absences
+    # We need to get all absences and filter by user_id and date range
+    url = f"{URL}/api/v1/absences{TOKEN_PARAMETER}&start_at={start_at}&end_at={end_at}"
+    return _get_instance_list_from_paginated_get_request(url, "absences", Absence)
+
+
+def delete_absence(absence_id):
+    print(f"deleting absence {absence_id}")
+    return _delete_request(f"{URL}/api/v1/absences/{absence_id}{TOKEN_PARAMETER}")
+
+
 def update_user_slack_id(user_id, slack_id):
     print(f"updating slack_id for user {user_id} to {slack_id}")
     user_data = {"user": {"slack_id": slack_id}}
@@ -111,3 +124,15 @@ def _put_request_json(url, data):
             f"Request {url} failed with status code {response.status_code}: {response.text}"
         )
     return response.json()
+
+
+def _delete_request(url):
+    response = requests.delete(url, headers=HEADERS)
+    if not response.ok:
+        if response.status_code == 404:
+            print("Absence not found (404)")
+            return False
+        raise RequestFailedException(
+            f"Request {url} failed with status code {response.status_code}: {response.text}"
+        )
+    return True
