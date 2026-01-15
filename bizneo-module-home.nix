@@ -11,7 +11,6 @@ let
     mkIf
     types
     mkEnableOption
-    mkPackageOption
     getExe
     ;
   cfg = config.services.bizneo;
@@ -43,13 +42,15 @@ in
         description = "Schedule of when to launch the bizneo command.";
       };
 
-      package = mkPackageOption pkgs "bizneo" { };
+      package = mkOption {
+        type = types.package;
+        default = flake.packages.${pkgs.system}.bizneo;
+        description = "The bizneo package to use.";
+      };
     };
   };
 
   config = mkIf cfg.enable {
-    nixpkgs.overlays = [ (final: prev: { bizneo = flake.packages.${prev.system}.bizneo; }) ];
-
     home.packages = [ cfg.package ];
 
     # Linux: systemd user services
