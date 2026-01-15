@@ -6,7 +6,12 @@ from typing import Literal
 
 import click
 
-from src.api.absences_tasks import create_absence_for_all_users, create_absence_for_user
+from src.api.absences_tasks import (
+    create_absence_for_all_users,
+    create_absence_for_user,
+    delete_absence_for_all_users,
+    delete_absence_for_user,
+)
 from src.api.bizneo_requestor import get_user, get_users, update_user_slack_id
 from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
@@ -54,6 +59,18 @@ def add(kind, start_at, end_at, comment, user_id):
         create_absence_for_user(user_id, kind, start_at, end_at, comment)
     else:
         create_absence_for_all_users(kind, start_at, end_at, comment)
+
+
+@absences.command()
+@click.option("--start_at", type=str, required=True, help="Start date of the absence to delete")
+@click.option("--end_at", type=str, required=True, help="End date of the absence to delete")
+@click.option("--user_id", type=str, help="User to delete the absence from (empty for all users)")
+@click.option("--dry-run", is_flag=True, help="Preview what would be deleted without actually deleting")
+def delete(start_at, end_at, user_id, dry_run):
+    if user_id:
+        delete_absence_for_user(user_id, start_at, end_at, dry_run)
+    else:
+        delete_absence_for_all_users(start_at, end_at, dry_run)
 
 
 def parse_dict(ctx, param, value):
