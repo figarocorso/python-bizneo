@@ -23,10 +23,10 @@ in
 
       browser = mkOption {
         type = types.enum [
-          "chromium"
           "firefox"
+          "chromium"
         ];
-        default = "chromium";
+        default = "firefox";
         description = "Browser to be used for the bizneo command.";
       };
 
