@@ -34,6 +34,13 @@ def get_user(user_id):
     return User.from_dict(response.get("user", {}))
 
 
+def get_user_full_details(user_id):
+    """Get full user details including access, work_contracts, etc."""
+    get_user_url = f"{URL}/api/v1/users/{user_id}/{TOKEN_PARAMETER}"
+    response = _get_request_json(get_user_url)
+    return response.get("user", {})
+
+
 def get_users():
     get_users_url = f"{URL}/api/v1/users/{TOKEN_PARAMETER}&page={{page_number}}"
     return _get_instance_list_from_paginated_get_request(get_users_url, "users", User)

@@ -12,7 +12,7 @@ from src.api.absences_tasks import (
     delete_absence_for_all_users,
     delete_absence_for_user,
 )
-from src.api.bizneo_requestor import get_user, get_users, update_user_slack_id
+from src.api.bizneo_requestor import get_user, get_users, get_user_full_details, update_user_slack_id
 from src.api.reports_tasks import get_time_report
 from src.api.webhook import send_message_to_webhook
 from src.browser.library import add_expected_schedule, login_into
@@ -45,6 +45,11 @@ def time():
 
 @admin.group()
 def users():
+    pass
+
+
+@users.group()
+def reports():
     pass
 
 
@@ -438,6 +443,63 @@ def update_slack(email, slack_id):
         click.echo(f"\nVerification - Updated Slack ID: {updated_user.slack_id or 'N/A'}")
     except Exception as e:
         click.echo(f"❌ Error updating Slack ID: {e}")
+
+
+def contract_is_active(end_date_string):
+    if end_date_string is None:
+        return True
+
+    try:
+        end_date = datetime.strptime(end_date_string, "%Y-%m-%d")
+        return end_date >= datetime.now()
+    except Exception:
+        return False
+
+
+def user_has_active_contract(work_contracts):
+    return any(contract_is_active(contract.get("end_at")) for contract in work_contracts)
+
+
+def user_has_enabled_access(user_data):
+    return user_data.get("access") == "enabled"
+
+
+def user_has_slack_id(user_data):
+    return bool(user_data.get("slack_id"))
+
+
+def user_needs_slack_id(user_data):
+    has_access_or_contract = user_has_enabled_access(user_data) or user_has_active_contract(
+        user_data.get("work_contracts", [])
+    )
+    return has_access_or_contract and not user_has_slack_id(user_data)
+
+
+def find_users_without_slack_id():
+    users = get_users()
+    problematic_emails = []
+
+    for user in users:
+        user_data = get_user_full_details(user.user_id)
+        if user_needs_slack_id(user_data):
+            problematic_emails.append(user_data.get("email"))
+
+    return problematic_emails
+
+
+@reports.command()
+def missing_slack_id():
+    """Check for users with active contract/enabled access but without Slack ID."""
+    problematic_emails = find_users_without_slack_id()
+
+    if problematic_emails:
+        click.echo("Users with active contract/enabled access WITHOUT Slack ID:")
+        for email in problematic_emails:
+            click.echo(f"  - {email}")
+        raise click.exceptions.Exit(1)
+    else:
+        click.echo("All users with active contract/enabled access have Slack ID configured.")
+        raise click.exceptions.Exit(0)
 
 
 if __name__ == "__main__":
