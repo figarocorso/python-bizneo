@@ -2,6 +2,7 @@ from src.api.bizneo_requestor import get_user_logged_times, get_user_schedules, 
 
 
 EXPECTED_WORKING_HOURS = 8.0
+EXPECTED_HALF_WORKING_HOURS = 4.0
 
 
 def get_time_report(taxon, start_at, end_at, comment):
@@ -34,7 +35,8 @@ def _get_report_user_issues(schedules, logged_times):
     for schedule in [x for x in schedules if x.is_working_day]:
         for logged_time in logged_times:
             if schedule.date == logged_time.date and (
-                not logged_time.has_logged_time or logged_time.total_hours != EXPECTED_WORKING_HOURS
+                not logged_time.has_logged_time
+                or logged_time.total_hours not in [EXPECTED_WORKING_HOURS, EXPECTED_HALF_WORKING_HOURS]
             ):
                 issues += f"  - {schedule.date}: {logged_time.total_hours} horas\n"
     return issues
