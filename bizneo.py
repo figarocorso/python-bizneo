@@ -384,8 +384,9 @@ def expected(headless: bool, browser: Literal["firefox", "chromium"]):
     default="firefox",
     help="What kind of browser should be run: firefox, chromium",
 )
-def login(browser: Literal["firefox", "chromium"]):
-    login_into(browser)
+@click.option("--keep-open", is_flag=True, required=False, help="Keep browser open after login")
+def login(browser: Literal["firefox", "chromium"], keep_open: bool):
+    login_into(browser, keep_open)
 
 
 @users.command()

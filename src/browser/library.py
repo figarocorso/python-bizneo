@@ -1,7 +1,7 @@
 from typing import List
 from os import path
 from glob import glob
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
 PROFILE_PATH = ""
@@ -42,17 +42,29 @@ def add_expected_schedule(headless, browser):
         browser.close()
 
 
-def login_into(browser):
+def login_into(browser, keep_open=False):
     with sync_playwright() as playwright:
-        browser, page = get_browser_and_page(playwright, False, browser)
-        page.goto("https://sysdig.bizneohr.com", timeout=0)
+        browser_ctx, page = get_browser_and_page(playwright, False, browser)
 
-        # Wait for a specific element that indicates the user is logged in.
-        # Waiting for the button with specific classes to confirm login.
-        page.wait_for_selector(".button.is-link.current-user.dropdown-btn.no-arrow", timeout=0)
-        print("User successfully logged in.")
+        try:
+            page.goto("https://sysdig.bizneohr.com", timeout=60000)
+        except PlaywrightTimeoutError:
+            pass
 
-        browser.close()
+        while True:
+            try:
+                page.wait_for_selector(".current-user", timeout=5000)
+                print("User successfully logged in.")
+                if keep_open:
+                    print("Browser kept open. Close it manually when done.")
+                    page.wait_for_event("close", timeout=0)
+                browser_ctx.close()
+                return
+            except PlaywrightTimeoutError:
+                continue
+            except Exception:
+                print("Browser closed before login was detected.")
+                return
 
 
 # Fixme(fede): should we refactor this and move it to another module?
