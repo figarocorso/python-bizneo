@@ -3,6 +3,8 @@ from os import path
 from glob import glob
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
+from src.browser.notify import send_notification
+
 
 PROFILE_PATH = ""
 HOME_PATH = path.expanduser("~")
@@ -22,8 +24,9 @@ def add_expected_schedule(headless, browser):
         browser, page = get_browser_and_page(playwright, headless, browser)
         page.goto("https://sysdig.bizneohr.com")
 
-        if page.locator('//p[text()="Log in with"]').count() > 0:
+        if page.locator('//p[normalize-space()="Log in to Sysdig"]').count() > 0:
             print("User not logged in. Run bizneo browser login.")
+            send_notification("Bizneo", "Not logged in. Run: bizneo browser login")
             return
 
         today_locator = '//div[@class="day-header today"]'
