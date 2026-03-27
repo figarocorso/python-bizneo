@@ -38,8 +38,8 @@ in
 
       schedule = mkOption {
         type = types.str;
-        default = "Mon..Fri 08..18:00:00"; # Each hour from 8 to 18 on weekdays.
-        description = "Schedule of when to launch the bizneo command.";
+        default = "hourly";
+        description = "Schedule of when to launch the bizneo command. Uses systemd OnCalendar syntax.";
       };
 
       package = mkOption {

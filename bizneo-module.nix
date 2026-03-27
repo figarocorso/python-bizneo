@@ -25,7 +25,7 @@ in
           "chromium"
           "firefox"
         ];
-        default = "chromium";
+        default = "firefox";
         description = "Browser to be used for the bizneo command.";
       };
 
@@ -37,7 +37,7 @@ in
 
       schedule = mkOption {
         type = types.str;
-        default = "Mon..Fri 08..18:00:00"; # Each hour from 8 to 18 on weekdays.
+        default = "hourly";
         description = "Schedule of when to launch the bizneo command.";
       };
 
