@@ -191,74 +191,77 @@ def individual_reports(comment, start_at, end_at, webhook, headers, taxon, dry_r
         click.echo(f"No users with Slack ID found{f' for taxon: {taxon}' if taxon else ''}")
         return
 
-    click.echo(f"Sending individual reports to {len(users_with_slack)} users...")
+    click.echo(f"Checking {len(users_with_slack)} users with Slack ID...")
     click.echo(f"Date range: [{start_at}, {end_at}]")
     click.echo(f"Dry-run mode: {'ON' if dry_run else 'OFF'}\n")
 
-    success_count = 0
+    from src.api.bizneo_requestor import get_user_schedules, get_user_logged_times
+    from src.api.reports_tasks import _get_report_user_issues, _get_report_user_string
+
+    pending_messages = []
     skip_count = 0
-    error_no_slack_count = 0
+    no_slack_with_issues = []
 
+    click.echo("=== Checking phase ===")
     for user in users_with_slack:
-        # Generate individual report for this user using the same logic as test_single_user
-        from src.api.bizneo_requestor import get_user_schedules, get_user_logged_times
-        from src.api.reports_tasks import _get_report_user_issues, _get_report_user_string
-
         schedules = get_user_schedules(user.user_id, start_at, end_at)
         logged_times = get_user_logged_times(user.user_id, start_at, end_at)
         issues = _get_report_user_issues(schedules, logged_times)
 
-        # Check if user has issues to report
         if not issues:
             skip_count += 1
-            click.echo(f"⏭️  Skipping {user.first_name} {user.last_name} - no issues")
+            click.echo(f"  ⏭️  {user.first_name} {user.last_name} - no issues")
             continue
 
-        # Build the report with issues
         user_string = _get_report_user_string(user, start_at, "")
+        header_line = f"Reporte para el rango de fechas: [{start_at}, {end_at}]"
         if comment:
-            user_report = (
-                f"{comment}\nReporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
-            )
+            user_report = f"{comment}\n{header_line}\n{user_string}\n{issues}"
         else:
-            user_report = f"Reporte para el rango de fechas: [{start_at}, {end_at}]\n{user_string}\n{issues}"
+            user_report = f"{header_line}\n{user_string}\n{issues}"
 
-        # Prepare headers with user's slack channel
         user_headers = headers.copy() if headers else {}
         user_headers["channel-id"] = user.slack_id
 
-        if dry_run:
-            click.echo(f"\n{'='*60}")
-            click.echo(f"DRY-RUN: Would send to {user.first_name} {user.last_name}")
-            click.echo(f"Slack ID: {user.slack_id}")
-            click.echo(f"Webhook: {webhook}")
-            click.echo(f"Headers: {user_headers}")
-            click.echo(f"\nReport content:\n{user_report}")
-            click.echo(f"{'='*60}\n")
-            success_count += 1
-        else:
-            ok, response = send_message_to_webhook(webhook, user_report, user_headers)
-            if ok:
-                click.echo(f"✅ Sent to {user.first_name} {user.last_name} ({user.slack_id})")
-                success_count += 1
-            else:
-                click.echo(f"❌ Error sending to {user.first_name} {user.last_name}: {response}")
+        pending_messages.append((user, user_headers, user_report))
+        click.echo(f"  ⚠️  {user.first_name} {user.last_name} - issues found")
 
-    # Check for users without Slack ID who have time issues
     for user in users_without_slack:
         schedules = get_user_schedules(user.user_id, start_at, end_at)
         logged_times = get_user_logged_times(user.user_id, start_at, end_at)
         issues = _get_report_user_issues(schedules, logged_times)
         if issues:
-            error_no_slack_count += 1
+            no_slack_with_issues.append(user)
             click.echo(
-                f"⚠️  ERROR: {user.first_name} {user.last_name} ({user.email}) has time issues but NO Slack ID configured!"
+                f"  ⚠️  ERROR: {user.first_name} {user.last_name} ({user.email}) has issues but NO Slack ID"
             )
 
-    click.echo(f"\n{'Dry-run' if dry_run else 'Sending'} completed:")
-    click.echo(f"  - Sent: {success_count}")
+    click.echo(f"\n=== {'Messages that would be sent' if dry_run else 'Sending messages'} ===")
+    success_count = 0
+    error_count = 0
+    for user, user_headers, user_report in pending_messages:
+        click.echo(f"\n{'-'*60}")
+        click.echo(f"→ {user.first_name} {user.last_name} (slack_id={user.slack_id})")
+        click.echo(f"Headers: {user_headers}")
+        click.echo(f"\n{user_report}")
+        if dry_run:
+            success_count += 1
+        else:
+            ok, response = send_message_to_webhook(webhook, user_report, user_headers)
+            if ok:
+                click.echo("✅ Sent")
+                success_count += 1
+            else:
+                click.echo(f"❌ Error: {response}")
+                error_count += 1
+    click.echo(f"{'-'*60}\n")
+
+    click.echo(f"=== {'Dry-run' if dry_run else 'Sending'} summary ===")
+    click.echo(f"  - {'Would send' if dry_run else 'Sent'}: {success_count}")
+    if not dry_run:
+        click.echo(f"  - Send errors: {error_count}")
     click.echo(f"  - Skipped (no issues): {skip_count}")
-    click.echo(f"  - Errors (no Slack ID but has issues): {error_no_slack_count}")
+    click.echo(f"  - Errors (no Slack ID but has issues): {len(no_slack_with_issues)}")
     click.echo(f"  - Total users with Slack ID: {len(users_with_slack)}")
     click.echo(f"  - Total users without Slack ID: {len(users_without_slack)}")
 

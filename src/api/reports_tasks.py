@@ -31,15 +31,33 @@ def get_time_report(taxon, start_at, end_at, comment):
 
 
 def _get_report_user_issues(schedules, logged_times):
-    issues = ""
-    for schedule in [x for x in schedules if x.is_working_day]:
-        for logged_time in logged_times:
-            if schedule.date == logged_time.date and (
-                not logged_time.has_logged_time
-                or logged_time.total_hours not in [EXPECTED_WORKING_HOURS, EXPECTED_HALF_WORKING_HOURS]
-            ):
-                issues += f"  - {schedule.date}: {logged_time.total_hours} horas\n"
-    return issues
+    working_dates = {s.date for s in schedules if s.is_working_day}
+    logged_by_date = {lt.date: lt for lt in logged_times}
+
+    issue_lines = []
+    for date in sorted(working_dates):
+        lt = logged_by_date.get(date)
+        if lt is None or not lt.has_logged_time:
+            issue_lines.append(f"  - {date}: 0 horas (día laboral sin registro)")
+            continue
+        regular = lt.regular_hours
+        if regular >= EXPECTED_WORKING_HOURS or regular == EXPECTED_HALF_WORKING_HOURS:
+            continue
+        suffix = f" ({lt.project_hours:g}h en proyecto)" if lt.has_projects else ""
+        issue_lines.append(f"  - {date}: {regular:g} horas regulares{suffix}")
+
+    for date in sorted(logged_by_date):
+        lt = logged_by_date[date]
+        if date in working_dates or not lt.has_logged_time:
+            continue
+        if lt.regular_hours <= 0:
+            continue
+        suffix = f" ({lt.project_hours:g}h en proyecto)" if lt.has_projects else ""
+        issue_lines.append(
+            f"  - {date}: {lt.regular_hours:g} horas regulares (día no laboral con registro){suffix}"
+        )
+
+    return "\n".join(issue_lines) + "\n" if issue_lines else ""
 
 
 def _get_report_user_string(user, start_at, comment):
