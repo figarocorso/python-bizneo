@@ -8,7 +8,7 @@ from src.browser.notify import send_notification
 
 PROFILE_PATH = ""
 HOME_PATH = path.expanduser("~")
-CHROMIUM_MACOS_PROFILE_PATH = f"{HOME_PATH}~/Library/Application Support/Chromium"
+CHROMIUM_MACOS_PROFILE_PATH = f"{HOME_PATH}/Library/Application Support/Chromium"
 CHROMIUM_LINUX_PROFILE_PATH = f"{HOME_PATH}/.config/chromium"
 CHROMIUM_LINUX_SNAP_PROFILE_PATH = f"{HOME_PATH}/snap/chromium/common/chromium"
 CHROMIUM_PATHS = [CHROMIUM_MACOS_PROFILE_PATH, CHROMIUM_LINUX_PROFILE_PATH, CHROMIUM_LINUX_SNAP_PROFILE_PATH]
