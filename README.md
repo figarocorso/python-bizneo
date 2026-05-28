@@ -137,6 +137,35 @@ inputs = {
 
 On Linux this creates a systemd user service + timer. On macOS it creates a launchd agent with logs at `~/Library/Logs/bizneo/`.
 
+## Periodic Validations
+
+Before running the validations:
+
+1. Configure the API token in `src/api/bizneo_requestor.py`.
+2. Make sure every employee has a `slack_id` assigned.
+
+### Weekly (every Tuesday)
+
+```sh
+uv run bizneo admin time individual-reports \
+  --comment "Hola, estoy revisando los registros de la semana anterior 💌" \
+  --webhook "${ZAPIER_WEBHOOK_URL}" \
+  --headers "{'emoji': ':bizneo:'}"
+```
+
+### Monthly (around the 15th of each month)
+
+```sh
+uv run bizneo admin time individual-reports \
+  --start_at $(date -d "$(date +%Y-%m-01) -1 month" +%Y-%m-%d) \
+  --end_at $(date -d "$(date +%Y-%m-01) -1 day" +%Y-%m-%d) \
+  --comment "Hola, estoy revisando los registros del mes anterior 💌" \
+  --webhook "${ZAPIER_WEBHOOK_URL}" \
+  --headers "{'emoji': ':bizneo:'}"
+```
+
+Add `--dry-run` to either command to preview without sending.
+
 ## License
 
 This project is licensed under the [GPL-3.0 License](LICENSE).
