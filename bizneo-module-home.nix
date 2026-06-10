@@ -44,7 +44,7 @@ in
 
       package = mkOption {
         type = types.package;
-        default = flake.packages.${pkgs.system}.bizneo;
+        default = flake.packages.${pkgs.stdenv.hostPlatform.system}.bizneo;
         description = "The bizneo package to use.";
       };
     };
