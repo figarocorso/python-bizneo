@@ -46,7 +46,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    nixpkgs.overlays = [ (final: prev: { bizneo = flake.packages.${prev.system}.bizneo; }) ];
+    nixpkgs.overlays = [ (final: prev: { bizneo = flake.packages.${prev.stdenv.hostPlatform.system}.bizneo; }) ];
 
     environment.systemPackages = [ cfg.package ];
 
