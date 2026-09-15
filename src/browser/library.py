@@ -1,3 +1,4 @@
+import os
 from typing import List
 from os import path
 from glob import glob
@@ -6,7 +7,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 from src.browser.notify import send_notification
 
 
-PROFILE_PATH = ""
+PROFILE_PATH = os.environ.get("BIZNEO_PROFILE_PATH", "")
 HOME_PATH = path.expanduser("~")
 CHROMIUM_MACOS_PROFILE_PATH = f"{HOME_PATH}/Library/Application Support/Chromium"
 CHROMIUM_LINUX_PROFILE_PATH = f"{HOME_PATH}/.config/chromium"
@@ -23,8 +24,9 @@ def add_expected_schedule(headless, browser):
     with sync_playwright() as playwright:
         browser, page = get_browser_and_page(playwright, headless, browser)
         page.goto("https://sysdig.bizneohr.com")
+        page.wait_for_load_state("networkidle")
 
-        if page.locator('//p[normalize-space()="Log in to Sysdig"]').count() > 0:
+        if "/sessions/new" in page.url:
             print("User not logged in. Run bizneo browser login.")
             send_notification("Bizneo", "Not logged in. Run: bizneo browser login")
             return
