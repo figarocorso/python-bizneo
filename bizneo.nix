@@ -41,7 +41,7 @@ python3Packages.buildPythonApplication {
     wrapProgram $out/bin/bizneo \
       --set-default PLAYWRIGHT_BROWSERS_PATH ${playwright-driver.browsers} \
       --set-default PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS true \
-      ${lib.optionalString stdenv.isLinux "--prefix PATH : ${lib.makeBinPath [ libnotify ]}"}
+      ${lib.optionalString stdenv.hostPlatform.isLinux "--prefix PATH : ${lib.makeBinPath [ libnotify ]}"}
   '';
 
   doInstallCheck = true;
