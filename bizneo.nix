@@ -13,10 +13,7 @@ python3Packages.buildPythonApplication {
   src = ./.;
   pyproject = true;
 
-  build-system = with python3Packages; [
-    setuptools
-    setuptools-scm
-  ];
+  build-system = with python3Packages; [ setuptools ];
 
   dependencies = with python3Packages; [
     click
@@ -41,7 +38,7 @@ python3Packages.buildPythonApplication {
     wrapProgram $out/bin/bizneo \
       --set-default PLAYWRIGHT_BROWSERS_PATH ${playwright-driver.browsers} \
       --set-default PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS true \
-      ${lib.optionalString stdenv.isLinux "--prefix PATH : ${lib.makeBinPath [ libnotify ]}"}
+      ${lib.optionalString stdenv.hostPlatform.isLinux "--prefix PATH : ${lib.makeBinPath [ libnotify ]}"}
   '';
 
   doInstallCheck = true;
