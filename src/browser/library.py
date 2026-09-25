@@ -24,14 +24,19 @@ def add_expected_schedule(headless, browser):
     with sync_playwright() as playwright:
         browser, page = get_browser_and_page(playwright, headless, browser)
         page.goto("https://sysdig.bizneohr.com")
-        page.wait_for_load_state("networkidle")
+
+        # Don't wait for "networkidle": third-party trackers (e.g. Google Analytics)
+        # can keep a request pending forever, so it never fires.
+        today_locator = '//div[@class="day-header today"]'
+        page.wait_for_function(
+            """() => location.pathname.includes("/sessions/new")
+                  || document.querySelector("div.day-header.today") !== null"""
+        )
 
         if "/sessions/new" in page.url:
             print("User not logged in. Run bizneo browser login.")
             send_notification("Bizneo", "Not logged in. Run: bizneo browser login")
             return
-
-        today_locator = '//div[@class="day-header today"]'
 
         register_button = page.locator(today_locator + "//following-sibling::button")
         if register_button.count() == 0:
