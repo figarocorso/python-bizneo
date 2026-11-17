@@ -1,6 +1,5 @@
 from src.api.bizneo_requestor import get_user_logged_times, get_user_schedules, get_users
 
-
 EXPECTED_WORKING_HOURS = 8.0
 EXPECTED_HALF_WORKING_HOURS = 4.0
 
@@ -31,7 +30,8 @@ def get_time_report(taxon, start_at, end_at, comment):
 
 
 def _get_report_user_issues(schedules, logged_times):
-    working_dates = {s.date for s in schedules if s.is_working_day}
+    partial_absence_dates = {s.date for s in schedules if s.kind == "partial_absence"}
+    working_dates = {s.date for s in schedules if s.is_working_day} | partial_absence_dates
     logged_by_date = {lt.date: lt for lt in logged_times}
 
     issue_lines = []
@@ -41,6 +41,8 @@ def _get_report_user_issues(schedules, logged_times):
             issue_lines.append(f"  - {date}: 0 horas (día laboral sin registro)")
             continue
         regular = lt.regular_hours
+        if date in partial_absence_dates and regular > 0:
+            continue
         if regular >= EXPECTED_WORKING_HOURS or regular == EXPECTED_HALF_WORKING_HOURS:
             continue
         suffix = f" ({lt.project_hours:g}h en proyecto)" if lt.has_projects else ""
